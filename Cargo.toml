@@ -1,0 +1,4 @@
+[package]
+name = "i3ipc"
+version = "0.1.0"
+authors = ["Trevor Merrifield <trevorm42@gmail.com>"]
