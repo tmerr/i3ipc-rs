@@ -12,58 +12,58 @@ pub enum Event {
     Binding
 }
 
-struct I3Connection;
+pub struct I3Connection;
 
 impl I3Connection {
     /// Establishes an IPC connection to i3.
-    fn new() -> I3Connection {
+    pub fn connect() -> Result<I3Connection, String> {
         panic!("not implemented");
     }
 
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
     /// in the configuration file) and will be executed directly after receiving it.
-    fn command(string: &str) -> Result<reply::Command, String> {
+    pub fn command(&mut self, string: &str) -> Result<reply::Command, String> {
         panic!("not implemented");
     }
 
     /// Gets the current workspaces.
-    fn get_workspaces() -> Result<reply::Workspaces, String> {
+    pub fn get_workspaces(&mut self) -> Result<reply::Workspaces, String> {
         panic!("not implemented");
     }
 
     /// Subscribes your connection to certain events.
-    fn subscribe() -> Result<reply::Subscribe, String> {
+    pub fn subscribe(&mut self) -> Result<reply::Subscribe, String> {
         panic!("not implemented");
     }
 
     /// Gets the current outputs.
-    fn get_outputs() -> Result<reply::Outputs, String> {
+    pub fn get_outputs(&mut self) -> Result<reply::Outputs, String> {
         panic!("not implemented");
     }
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.
-    fn get_tree() -> Result<reply::Tree, String> {
+    pub fn get_tree(&mut self) -> Result<reply::Tree, String> {
         panic!("not implemented");
     }
 
     /// Gets a list of marks (identifiers for containers to easily jump to them later).
-    fn get_marks() -> Result<reply::Marks, String> {
+    pub fn get_marks(&mut self) -> Result<reply::Marks, String> {
         panic!("not implemented");
     }
 
     /// Gets an array with all configured bar IDs.
-    fn get_bar_ids() -> Result<reply::BarIds, String> {
+    pub fn get_bar_ids(&mut self) -> Result<reply::BarIds, String> {
         panic!("not implemented");
     }
 
     /// Gets the configuration of the workspace bar with the given ID.
-    fn get_bar_config(id: String) -> Result<reply::BarConfig, String> {
+    pub fn get_bar_config(&mut self, id: &str) -> Result<reply::BarConfig, String> {
         panic!("not implemented");
     }
 
     /// Gets the version of i3. The reply will include the major, minor, patch and human-readable
     /// version.
-    fn get_version() -> Result<reply::Version, String> {
+    pub fn get_version(&mut self) -> Result<reply::Version, String> {
         panic!("not implemented");
     }
 }
@@ -71,43 +71,86 @@ impl I3Connection {
 
 #[cfg(test)]
 mod test {
+    use I3Connection;
+
+    // for the following tests send a request and get the reponse.
+    // response types are specific so often getting them at all indicates success.
+    // can't do much better without mocking an i3 installation.
+
     #[test]
-    fn command() {
-        panic!("not implemented");
+    fn command_nothing() {
+        let mut connection = I3Connection::connect().unwrap();
+        let result = connection.command("").unwrap();
+        assert_eq!(result.outcomes.len(), 0);
     }
 
     #[test]
-    fn get_worksplaces() {
-        panic!("not implemented");
+    fn command_single_sucess() {
+        let mut connection = I3Connection::connect().unwrap();
+        let a = connection.command("move scratchpad").unwrap();
+        let b = connection.command("scratchpad show").unwrap();
+        assert_eq!(a.outcomes.len(), 1);
+        assert_eq!(b.outcomes.len(), 1);
+        assert!(a.outcomes[0].success);
+        assert!(b.outcomes[0].success);
+    }
+
+    #[test]
+    fn command_multiple_success() {
+        let mut connection = I3Connection::connect().unwrap();
+        let result = connection.command("move scratchpad; scratchpad show").unwrap();
+        assert_eq!(result.outcomes.len(), 2);
+        assert!(result.outcomes[0].success);
+        assert!(result.outcomes[1].success);
+    }
+
+    #[test]
+    fn command_fail() {
+        let mut connection = I3Connection::connect().unwrap();
+        let result = connection.command("ThisIsClearlyNotACommand").unwrap();
+        assert_eq!(result.outcomes.len(), 1);
+        assert!(!result.outcomes[0].success);
+    }
+
+    #[test]
+    fn get_workspaces() {
+        I3Connection::connect().unwrap().get_workspaces().unwrap();
     }
 
     #[test]
     fn subscribe() {
-        panic!("not implemented");
+        I3Connection::connect().unwrap().subscribe().unwrap();
     }
 
     #[test]
     fn get_outputs() {
-        panic!("not implemented");
+        I3Connection::connect().unwrap().get_outputs().unwrap();
     }
 
     #[test]
     fn get_tree() {
-        panic!("not implemented");
+        I3Connection::connect().unwrap().get_tree().unwrap();
     }
 
     #[test]
     fn get_marks() {
-        panic!("not implemented");
+        I3Connection::connect().unwrap().get_marks().unwrap();
     }
 
     #[test]
-    fn get_bar_config() {
-        panic!("not implemented");
+    fn get_bar_ids() {
+        I3Connection::connect().unwrap().get_bar_ids().unwrap();
+    }
+
+    #[test]
+    fn get_bar_ids_and_one_config() {
+        let mut connection = I3Connection::connect().unwrap();
+        let ids = connection.get_bar_ids().unwrap().ids;
+        let oneconfig = connection.get_bar_config(&ids[0]).unwrap();
     }
 
     #[test]
     fn get_version() {
-        panic!("not implemented");
+        I3Connection::connect().unwrap().get_version().unwrap();
     }
 }
