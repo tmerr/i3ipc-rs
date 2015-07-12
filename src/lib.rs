@@ -1,5 +1,10 @@
 //! A library for controlling i3-wm through its ipc interface.
 
+extern crate unix_socket;
+use std::process;
+use unix_socket::UnixStream;
+use std::io;
+
 pub mod reply;
 
 pub enum Event {
@@ -12,12 +17,59 @@ pub enum Event {
     Binding
 }
 
-pub struct I3Connection;
+/// An error while instantiating an I3Connection. Creating an I3Connection involves first getting
+/// the i3 socket path, then connecting to the socket. Either part could go wrong, which is why
+/// there are two possibilities here.
+#[derive(Debug)]
+pub enum I3ConnectError {
+    /// An error while getting the socket path
+    GetSocketPathError(io::Error),
+    /// An error while accessing the socket
+    SocketError(io::Error)
+}
+
+pub struct I3Connection {
+    stream: UnixStream
+}
 
 impl I3Connection {
+
     /// Establishes an IPC connection to i3.
-    pub fn connect() -> Result<I3Connection, String> {
-        panic!("not implemented");
+    pub fn connect() -> Result<I3Connection, I3ConnectError> {
+        fn get_socket_path() -> Result<String, io::Error> {
+            let result = process::Command::new("i3")
+                                          .arg("--get-socketpath")
+                                          .output();
+            return match result {
+                Ok(output) => {
+                    return if output.status.success() {
+                        Ok(String::from_utf8_lossy(&output.stdout)
+                                  .trim_right() // remove trailing \n
+                                  .to_owned())
+                    } else {
+                        let prefix = "i3 --getsocketpath didn't return 0";
+                        let error_text = if output.stderr.len() > 0 {
+                            format!("{}. stderr: {:?}", prefix, output.stderr)
+                        } else {
+                            prefix.to_owned()
+                        };
+                        let error = io::Error::new(io::ErrorKind::Other, error_text);
+                        Err(error)
+                    }
+                }
+                Err(error) => Err(error)
+            }
+        }
+
+        return match get_socket_path() {
+            Ok(path) => {
+                match UnixStream::connect(path) {
+                    Ok(stream) => Ok(I3Connection { stream: stream }),
+                    Err(error) => Err(I3ConnectError::SocketError(error))
+                }
+            }
+            Err(error) => Err(I3ConnectError::GetSocketPathError(error))
+        }
     }
 
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
@@ -76,6 +128,11 @@ mod test {
     // for the following tests send a request and get the reponse.
     // response types are specific so often getting them at all indicates success.
     // can't do much better without mocking an i3 installation.
+    
+    #[test]
+    fn connect() {
+        I3Connection::connect().unwrap();
+    }
 
     #[test]
     fn command_nothing() {
