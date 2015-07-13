@@ -104,14 +104,6 @@ impl I3Connection {
             Err(error) => Err(I3ConnectError::GetSocketPathError(error))
         }
     }
-    
-    fn send_message(&mut self, message_type: u32, payload: &str) -> io::Result<()> {
-        self.stream.send_i3_message(message_type, payload)
-    }
-
-    fn receive_message(&mut self) -> io::Result<String> {
-        self.stream.receive_i3_message()
-    }
 
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
     /// in the configuration file) and will be executed directly after receiving it.
