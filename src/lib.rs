@@ -1,10 +1,17 @@
 //! A library for controlling i3-wm through its ipc interface.
 
 extern crate unix_socket;
+extern crate byteorder;
+extern crate serde;
+
 use std::process;
 use unix_socket::UnixStream;
 use std::io;
+use std::io::prelude::*;
+use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
+use serde::json;
 
+mod readhelp;
 pub mod reply;
 
 pub enum Event {
@@ -36,28 +43,23 @@ impl I3Connection {
 
     /// Establishes an IPC connection to i3.
     pub fn connect() -> Result<I3Connection, I3ConnectError> {
-        fn get_socket_path() -> Result<String, io::Error> {
-            let result = process::Command::new("i3")
-                                          .arg("--get-socketpath")
-                                          .output();
-            return match result {
-                Ok(output) => {
-                    return if output.status.success() {
-                        Ok(String::from_utf8_lossy(&output.stdout)
-                                  .trim_right() // remove trailing \n
-                                  .to_owned())
-                    } else {
-                        let prefix = "i3 --getsocketpath didn't return 0";
-                        let error_text = if output.stderr.len() > 0 {
-                            format!("{}. stderr: {:?}", prefix, output.stderr)
-                        } else {
-                            prefix.to_owned()
-                        };
-                        let error = io::Error::new(io::ErrorKind::Other, error_text);
-                        Err(error)
-                    }
-                }
-                Err(error) => Err(error)
+        fn get_socket_path() -> io::Result<String> {
+            let output = try!(process::Command::new("i3")
+                                               .arg("--get-socketpath")
+                                               .output());
+            if output.status.success() {
+                Ok(String::from_utf8_lossy(&output.stdout)
+                          .trim_right_matches('\n')
+                          .to_owned())
+            } else {
+                let prefix = "i3 --getsocketpath didn't return 0";
+                let error_text = if output.stderr.len() > 0 {
+                    format!("{}. stderr: {:?}", prefix, output.stderr)
+                } else {
+                    prefix.to_owned()
+                };
+                let error = io::Error::new(io::ErrorKind::Other, error_text);
+                Err(error)
             }
         }
 
@@ -71,15 +73,56 @@ impl I3Connection {
             Err(error) => Err(I3ConnectError::GetSocketPathError(error))
         }
     }
+    
+    fn send_message(&mut self, message_type: u32, payload: &str) -> io::Result<()> {
+        let mut bytes = Vec::with_capacity(14 + payload.len());
+        bytes.extend("i3-ipc".bytes());                              // 6 bytes
+        try!(bytes.write_u32::<LittleEndian>(payload.len() as u32)); // 4 bytes
+        try!(bytes.write_u32::<LittleEndian>(message_type));         // 4 bytes
+        bytes.extend(payload.bytes());                               // payload.len() bytes
+        self.stream.write_all(&bytes[..])
+    }
+
+    fn receive_message(&mut self) -> io::Result<String> {
+        let magic_data = try!(readhelp::read_exact(&mut self.stream, 6));
+        let magic_string = String::from_utf8_lossy(&magic_data);
+        if magic_string != "i3-ipc" {
+            let error_text = format!("unexpected magic string: expected 'i3-ipc' but got {}",
+                                      magic_string);
+            return Err(io::Error::new(io::ErrorKind::Other, error_text));
+        }
+        let payload_len = try!(self.stream.read_u32::<LittleEndian>());
+        let message_type = try!(self.stream.read_u32::<LittleEndian>());
+        let payload_data = try!(readhelp::read_exact(&mut self.stream, payload_len as usize));
+        Ok(String::from_utf8_lossy(&payload_data).into_owned())
+    }
 
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
     /// in the configuration file) and will be executed directly after receiving it.
-    pub fn command(&mut self, string: &str) -> Result<reply::Command, String> {
-        panic!("not implemented");
+    pub fn command(&mut self, string: &str) -> io::Result<reply::Command> {
+        try!(self.send_message(0, string));
+        let payload = try!(self.receive_message());
+
+        // assumes valid json
+        let j: json::Value = json::from_str(&payload).unwrap();
+        let commands = j.as_array().unwrap();
+        let vec: Vec<_>
+            = commands.iter()
+                      .map(|c| 
+                           reply::CommandOutcome {
+                               success: c.find("success").unwrap().as_boolean().unwrap(),
+                               error: match c.find("error") {
+                                   Some(val) => Some(val.as_string().unwrap().to_owned()),
+                                   None => None
+                               }
+                           })
+                      .collect();
+
+        Ok(reply::Command { outcomes: vec })
     }
 
     /// Gets the current workspaces.
-    pub fn get_workspaces(&mut self) -> Result<reply::Workspaces, String> {
+    pub fn get_workspaces(&mut self) -> io::Result<reply::Workspaces> {
         panic!("not implemented");
     }
 
@@ -144,18 +187,15 @@ mod test {
     #[test]
     fn command_single_sucess() {
         let mut connection = I3Connection::connect().unwrap();
-        let a = connection.command("move scratchpad").unwrap();
-        let b = connection.command("scratchpad show").unwrap();
+        let a = connection.command("exec /bin/true").unwrap();
         assert_eq!(a.outcomes.len(), 1);
-        assert_eq!(b.outcomes.len(), 1);
         assert!(a.outcomes[0].success);
-        assert!(b.outcomes[0].success);
     }
 
     #[test]
     fn command_multiple_success() {
         let mut connection = I3Connection::connect().unwrap();
-        let result = connection.command("move scratchpad; scratchpad show").unwrap();
+        let result = connection.command("exec /bin/true; exec /bin/true").unwrap();
         assert_eq!(result.outcomes.len(), 2);
         assert!(result.outcomes[0].success);
         assert!(result.outcomes[1].success);

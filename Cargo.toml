@@ -5,3 +5,5 @@ authors = ["Trevor Merrifield <trevorm42@gmail.com>"]
 
 [dependencies]
 unix_socket = "0.4.3"
+byteorder = "*"
+serde = "*"
