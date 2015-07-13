@@ -121,6 +121,14 @@ impl I3Connection {
         Ok(reply::Command { outcomes: vec })
     }
 
+    fn unpack_rect(jrect: &json::Value) -> (i32, i32, i32, i32) {
+        let x = jrect.find("x").unwrap().as_i64().unwrap() as i32;
+        let y = jrect.find("y").unwrap().as_i64().unwrap() as i32;
+        let width = jrect.find("width").unwrap().as_i64().unwrap() as i32;
+        let height = jrect.find("height").unwrap().as_i64().unwrap() as i32;
+        (x, y, width, height)
+    }
+
     /// Gets the current workspaces.
     pub fn get_workspaces(&mut self) -> io::Result<reply::Workspaces> {
         try!(self.send_message(1, ""));
@@ -137,13 +145,7 @@ impl I3Connection {
                                   visible: w.find("visible").unwrap().as_boolean().unwrap(),
                                   focused: w.find("focused").unwrap().as_boolean().unwrap(),
                                   urgent: w.find("urgent").unwrap().as_boolean().unwrap(),
-                                  rect: {
-                                      let jrect = w.find("rect").unwrap();
-                                      (jrect.find("x").unwrap().as_i64().unwrap() as i32,
-                                       jrect.find("y").unwrap().as_i64().unwrap() as i32,
-                                       jrect.find("width").unwrap().as_i64().unwrap() as i32,
-                                       jrect.find("height").unwrap().as_i64().unwrap() as i32)
-                                  },
+                                  rect: I3Connection::unpack_rect(w.find("rect").unwrap()),
                                   output: w.find("output").unwrap().as_string().unwrap().to_owned()
                               })
                          .collect();
@@ -157,7 +159,26 @@ impl I3Connection {
 
     /// Gets the current outputs.
     pub fn get_outputs(&mut self) -> io::Result<reply::Outputs> {
-        panic!("not implemented");
+        try!(self.send_message(3, ""));
+        let payload = try!(self.receive_message());
+
+        let j: json::Value = json::from_str(&payload).unwrap();
+        let joutputs = j.as_array().unwrap();
+        let outputs: Vec<_>
+            = joutputs.iter()
+                      .map(|o|
+                           reply::Output {
+                               name: o.find("name").unwrap().as_string().unwrap().to_owned(),
+                               active: o.find("active").unwrap().as_boolean().unwrap(),
+                               current_workspace: match o.find("current_workspace").unwrap().clone() {
+                                   json::Value::String(c_w) => Some(c_w),
+                                   json::Value::Null => None,
+                                   _ => unreachable!()
+                               },
+                               rect: I3Connection::unpack_rect(o.find("rect").unwrap())
+                           })
+                      .collect();
+        Ok(reply::Outputs { outputs: outputs })
     }
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.

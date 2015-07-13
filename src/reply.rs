@@ -56,9 +56,9 @@ pub struct Output {
     pub name: String,
     /// Whether the output is currently active (has a valid mode).
     pub active: bool,
-    /// The name of the current workspace that is visible on this output. null if the output is
+    /// The name of the current workspace that is visible on this output. None if the output is
     /// not active.
-    pub current_workspace: String,
+    pub current_workspace: Option<String>,
     /// The rectangle of this output (equals the rect of the output it is on), consists of
     /// x, y, width, height.
     pub rect: (i32, i32, i32, i32)
