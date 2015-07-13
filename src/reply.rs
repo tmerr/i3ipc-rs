@@ -166,6 +166,7 @@ pub struct BarIds {
     pub ids: Vec<String>
 }
 
+#[derive(Hash, Eq, PartialEq)]
 pub enum ColorableBarPart {
     /// Background color of the bar.
     Background,
