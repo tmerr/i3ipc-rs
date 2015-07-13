@@ -86,13 +86,39 @@ impl I3Funcs for UnixStream {
     }
 }
 
+/// Abstraction over an ipc socket to i3. Handles events.
+pub struct I3EventHandler {
+    stream: UnixStream
+}
+
+impl I3EventHandler {
+    /// Establishes the IPC connection.
+    pub fn connect() -> Result<I3EventHandler, I3ConnectError> {
+        return match get_socket_path() {
+            Ok(path) => {
+                match UnixStream::connect(path) {
+                    Ok(stream) => Ok(I3EventHandler { stream: stream }),
+                    Err(error) => Err(I3ConnectError::SocketError(error))
+                }
+            }
+            Err(error) => Err(I3ConnectError::GetSocketPathError(error))
+        }
+    }
+
+    /// Subscribes your connection to certain events.
+    pub fn subscribe(&self) -> io::Result<reply::Subscribe> {
+        panic!("not implemented");
+    }
+}
+
+/// Abstraction over an ipc socket to i3. Handles messages/replies.
 pub struct I3Connection {
     stream: UnixStream
 }
 
 impl I3Connection {
 
-    /// Establishes an IPC connection to i3.
+    /// Establishes the IPC connection.
     pub fn connect() -> Result<I3Connection, I3ConnectError> {
         return match get_socket_path() {
             Ok(path) => {
@@ -158,11 +184,6 @@ impl I3Connection {
                               })
                          .collect();
         Ok(reply::Workspaces { workspaces: workspaces })
-    }
-
-    /// Subscribes your connection to certain events.
-    pub fn subscribe(&mut self) -> io::Result<reply::Subscribe> {
-        panic!("not implemented");
     }
 
     /// Gets the current outputs.
@@ -268,6 +289,7 @@ impl I3Connection {
 #[cfg(test)]
 mod test {
     use I3Connection;
+    use I3EventHandler;
 
     // for the following tests send a request and get the reponse.
     // response types are specific so often getting them at all indicates success.
@@ -317,7 +339,7 @@ mod test {
 
     #[test]
     fn subscribe() {
-        I3Connection::connect().unwrap().subscribe().unwrap();
+        I3EventHandler::connect().unwrap().subscribe().unwrap();
     }
 
     #[test]
