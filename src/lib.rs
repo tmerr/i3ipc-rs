@@ -36,6 +36,56 @@ pub enum I3ConnectError {
     SocketError(io::Error)
 }
 
+fn get_socket_path() -> io::Result<String> {
+    let output = try!(process::Command::new("i3")
+                                       .arg("--get-socketpath")
+                                       .output());
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout)
+                  .trim_right_matches('\n')
+                  .to_owned())
+    } else {
+        let prefix = "i3 --getsocketpath didn't return 0";
+        let error_text = if output.stderr.len() > 0 {
+            format!("{}. stderr: {:?}", prefix, output.stderr)
+        } else {
+            prefix.to_owned()
+        };
+        let error = io::Error::new(io::ErrorKind::Other, error_text);
+        Err(error)
+    }
+}
+
+trait I3Funcs {
+    fn send_i3_message(&mut self, u32, &str) -> io::Result<()>;
+    fn receive_i3_message(&mut self) -> io::Result<String>;
+}
+
+impl I3Funcs for UnixStream {
+    fn send_i3_message(&mut self, message_type: u32, payload: &str) -> io::Result<()> {
+        let mut bytes = Vec::with_capacity(14 + payload.len());
+        bytes.extend("i3-ipc".bytes());                              // 6 bytes
+        try!(bytes.write_u32::<LittleEndian>(payload.len() as u32)); // 4 bytes
+        try!(bytes.write_u32::<LittleEndian>(message_type));         // 4 bytes
+        bytes.extend(payload.bytes());                               // payload.len() bytes
+        self.write_all(&bytes[..])
+    }
+
+    fn receive_i3_message(&mut self) -> io::Result<String> {
+        let magic_data = try!(readhelp::read_exact(self, 6));
+        let magic_string = String::from_utf8_lossy(&magic_data);
+        if magic_string != "i3-ipc" {
+            let error_text = format!("unexpected magic string: expected 'i3-ipc' but got {}",
+                                      magic_string);
+            return Err(io::Error::new(io::ErrorKind::Other, error_text));
+        }
+        let payload_len = try!(self.read_u32::<LittleEndian>());
+        let message_type = try!(self.read_u32::<LittleEndian>());
+        let payload_data = try!(readhelp::read_exact(self, payload_len as usize));
+        Ok(String::from_utf8_lossy(&payload_data).into_owned())
+    }
+}
+
 pub struct I3Connection {
     stream: UnixStream
 }
@@ -44,26 +94,6 @@ impl I3Connection {
 
     /// Establishes an IPC connection to i3.
     pub fn connect() -> Result<I3Connection, I3ConnectError> {
-        fn get_socket_path() -> io::Result<String> {
-            let output = try!(process::Command::new("i3")
-                                               .arg("--get-socketpath")
-                                               .output());
-            if output.status.success() {
-                Ok(String::from_utf8_lossy(&output.stdout)
-                          .trim_right_matches('\n')
-                          .to_owned())
-            } else {
-                let prefix = "i3 --getsocketpath didn't return 0";
-                let error_text = if output.stderr.len() > 0 {
-                    format!("{}. stderr: {:?}", prefix, output.stderr)
-                } else {
-                    prefix.to_owned()
-                };
-                let error = io::Error::new(io::ErrorKind::Other, error_text);
-                Err(error)
-            }
-        }
-
         return match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
@@ -76,33 +106,18 @@ impl I3Connection {
     }
     
     fn send_message(&mut self, message_type: u32, payload: &str) -> io::Result<()> {
-        let mut bytes = Vec::with_capacity(14 + payload.len());
-        bytes.extend("i3-ipc".bytes());                              // 6 bytes
-        try!(bytes.write_u32::<LittleEndian>(payload.len() as u32)); // 4 bytes
-        try!(bytes.write_u32::<LittleEndian>(message_type));         // 4 bytes
-        bytes.extend(payload.bytes());                               // payload.len() bytes
-        self.stream.write_all(&bytes[..])
+        self.stream.send_i3_message(message_type, payload)
     }
 
     fn receive_message(&mut self) -> io::Result<String> {
-        let magic_data = try!(readhelp::read_exact(&mut self.stream, 6));
-        let magic_string = String::from_utf8_lossy(&magic_data);
-        if magic_string != "i3-ipc" {
-            let error_text = format!("unexpected magic string: expected 'i3-ipc' but got {}",
-                                      magic_string);
-            return Err(io::Error::new(io::ErrorKind::Other, error_text));
-        }
-        let payload_len = try!(self.stream.read_u32::<LittleEndian>());
-        let message_type = try!(self.stream.read_u32::<LittleEndian>());
-        let payload_data = try!(readhelp::read_exact(&mut self.stream, payload_len as usize));
-        Ok(String::from_utf8_lossy(&payload_data).into_owned())
+        self.stream.receive_i3_message()
     }
 
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
     /// in the configuration file) and will be executed directly after receiving it.
     pub fn command(&mut self, string: &str) -> io::Result<reply::Command> {
-        try!(self.send_message(0, string));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(0, string));
+        let payload = try!(self.stream.receive_i3_message());
 
         // assumes valid json
         let j: json::Value = json::from_str(&payload).unwrap();
@@ -132,8 +147,8 @@ impl I3Connection {
 
     /// Gets the current workspaces.
     pub fn get_workspaces(&mut self) -> io::Result<reply::Workspaces> {
-        try!(self.send_message(1, ""));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(1, ""));
+        let payload = try!(self.stream.receive_i3_message());
 
         let j: json::Value = json::from_str(&payload).unwrap();
         let jworkspaces = j.as_array().unwrap();
@@ -160,8 +175,8 @@ impl I3Connection {
 
     /// Gets the current outputs.
     pub fn get_outputs(&mut self) -> io::Result<reply::Outputs> {
-        try!(self.send_message(3, ""));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(3, ""));
+        let payload = try!(self.stream.receive_i3_message());
 
         let j: json::Value = json::from_str(&payload).unwrap();
         let joutputs = j.as_array().unwrap();
@@ -189,24 +204,24 @@ impl I3Connection {
 
     /// Gets a list of marks (identifiers for containers to easily jump to them later).
     pub fn get_marks(&mut self) -> io::Result<reply::Marks> {
-        try!(self.send_message(5, ""));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(5, ""));
+        let payload = try!(self.stream.receive_i3_message());
         let marks: Vec<String> = json::from_str(&payload).unwrap();
         Ok(reply::Marks { marks: marks })
     }
 
     /// Gets an array with all configured bar IDs.
     pub fn get_bar_ids(&mut self) -> io::Result<reply::BarIds> {
-        try!(self.send_message(6, ""));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(6, ""));
+        let payload = try!(self.stream.receive_i3_message());
         let ids: Vec<String> = json::from_str(&payload).unwrap();
         Ok(reply::BarIds { ids: ids })
     }
 
     /// Gets the configuration of the workspace bar with the given ID.
     pub fn get_bar_config(&mut self, id: &str) -> io::Result<reply::BarConfig> {
-        try!(self.send_message(6, id));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(6, id));
+        let payload = try!(self.stream.receive_i3_message());
         let j: json::Value = json::from_str(&payload).unwrap();
         Ok(reply::BarConfig {
             id: j.find("id").unwrap().as_string().unwrap().to_owned(),
@@ -245,8 +260,8 @@ impl I3Connection {
     /// Gets the version of i3. The reply will include the major, minor, patch and human-readable
     /// version.
     pub fn get_version(&mut self) -> io::Result<reply::Version> {
-        try!(self.send_message(7, ""));
-        let payload = try!(self.receive_message());
+        try!(self.stream.send_i3_message(7, ""));
+        let payload = try!(self.stream.receive_i3_message());
         let j: json::Value = json::from_str(&payload).unwrap();
         Ok(reply::Version {
             major: j.find("major").unwrap().as_i64().unwrap() as i32,
