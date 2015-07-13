@@ -188,7 +188,10 @@ impl I3Connection {
 
     /// Gets a list of marks (identifiers for containers to easily jump to them later).
     pub fn get_marks(&mut self) -> io::Result<reply::Marks> {
-        panic!("not implemented");
+        try!(self.send_message(5, ""));
+        let payload = try!(self.receive_message());
+        let marks: Vec<String> = json::from_str(&payload).unwrap();
+        Ok(reply::Marks { marks: marks })
     }
 
     /// Gets an array with all configured bar IDs.
