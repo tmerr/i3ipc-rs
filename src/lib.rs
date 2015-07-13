@@ -127,38 +127,38 @@ impl I3Connection {
     }
 
     /// Subscribes your connection to certain events.
-    pub fn subscribe(&mut self) -> Result<reply::Subscribe, String> {
+    pub fn subscribe(&mut self) -> io::Result<reply::Subscribe> {
         panic!("not implemented");
     }
 
     /// Gets the current outputs.
-    pub fn get_outputs(&mut self) -> Result<reply::Outputs, String> {
+    pub fn get_outputs(&mut self) -> io::Result<reply::Outputs> {
         panic!("not implemented");
     }
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.
-    pub fn get_tree(&mut self) -> Result<reply::Tree, String> {
+    pub fn get_tree(&mut self) -> io::Result<reply::Tree> {
         panic!("not implemented");
     }
 
     /// Gets a list of marks (identifiers for containers to easily jump to them later).
-    pub fn get_marks(&mut self) -> Result<reply::Marks, String> {
+    pub fn get_marks(&mut self) -> io::Result<reply::Marks> {
         panic!("not implemented");
     }
 
     /// Gets an array with all configured bar IDs.
-    pub fn get_bar_ids(&mut self) -> Result<reply::BarIds, String> {
+    pub fn get_bar_ids(&mut self) -> io::Result<reply::BarIds> {
         panic!("not implemented");
     }
 
     /// Gets the configuration of the workspace bar with the given ID.
-    pub fn get_bar_config(&mut self, id: &str) -> Result<reply::BarConfig, String> {
+    pub fn get_bar_config(&mut self, id: &str) -> io::Result<reply::BarConfig> {
         panic!("not implemented");
     }
 
     /// Gets the version of i3. The reply will include the major, minor, patch and human-readable
     /// version.
-    pub fn get_version(&mut self) -> Result<reply::Version, String> {
+    pub fn get_version(&mut self) -> io::Result<reply::Version> {
         panic!("not implemented");
     }
 }
