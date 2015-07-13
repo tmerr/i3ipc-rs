@@ -245,7 +245,15 @@ impl I3Connection {
     /// Gets the version of i3. The reply will include the major, minor, patch and human-readable
     /// version.
     pub fn get_version(&mut self) -> io::Result<reply::Version> {
-        panic!("not implemented");
+        try!(self.send_message(7, ""));
+        let payload = try!(self.receive_message());
+        let j: json::Value = json::from_str(&payload).unwrap();
+        Ok(reply::Version {
+            major: j.find("major").unwrap().as_i64().unwrap() as i32,
+            minor: j.find("minor").unwrap().as_i64().unwrap() as i32,
+            patch: j.find("patch").unwrap().as_i64().unwrap() as i32,
+            human_readable: j.find("human_readable").unwrap().as_string().unwrap().to_owned()
+        })
     }
 }
 
