@@ -123,7 +123,31 @@ impl I3Connection {
 
     /// Gets the current workspaces.
     pub fn get_workspaces(&mut self) -> io::Result<reply::Workspaces> {
-        panic!("not implemented");
+        try!(self.send_message(1, ""));
+        let payload = try!(self.receive_message());
+
+        let j: json::Value = json::from_str(&payload).unwrap();
+        let jworkspaces = j.as_array().unwrap();
+        let workspaces: Vec<_>
+            = jworkspaces.iter()
+                         .map(|w|
+                              reply::Workspace {
+                                  num: w.find("num").unwrap().as_i64().unwrap() as i32,
+                                  name: w.find("name").unwrap().as_string().unwrap().to_owned(),
+                                  visible: w.find("visible").unwrap().as_boolean().unwrap(),
+                                  focused: w.find("focused").unwrap().as_boolean().unwrap(),
+                                  urgent: w.find("urgent").unwrap().as_boolean().unwrap(),
+                                  rect: {
+                                      let jrect = w.find("rect").unwrap();
+                                      (jrect.find("x").unwrap().as_i64().unwrap() as i32,
+                                       jrect.find("y").unwrap().as_i64().unwrap() as i32,
+                                       jrect.find("width").unwrap().as_i64().unwrap() as i32,
+                                       jrect.find("height").unwrap().as_i64().unwrap() as i32)
+                                  },
+                                  output: w.find("output").unwrap().as_string().unwrap().to_owned()
+                              })
+                         .collect();
+        Ok(reply::Workspaces { workspaces: workspaces })
     }
 
     /// Subscribes your connection to certain events.
