@@ -320,7 +320,9 @@ impl I3Connection {
 mod test {
     use I3Connection;
     use I3EventListener;
+    use event;
     use event::EventType;
+    use std::str::FromStr;
 
     // for the following tests send a request and get the reponse.
     // response types are specific so often getting them at all indicates success.
@@ -403,5 +405,111 @@ mod test {
     #[test]
     fn event_subscribe() {
         I3EventListener::connect().unwrap().subscribe(&[EventType::Workspace]).unwrap();
+    }
+
+    #[test]
+    fn from_str_workspace() {
+        let json_str = r##"
+        {
+            "change": "focus",
+            "current": {
+                "id": 28489712,
+                "name": "something"
+                "type": "workspace",
+                "border": "normal",
+                "current_border_width": 2,
+                "layout": "splith"
+                "orientation": "none",
+                "percent": 30.0,
+                "rect": { "x": 1600, "y": 0, "width": 1600, "height": 1200 },
+                "window_rect": { "x": 2, "y": 0, "width": 632, "height": 366 },
+                "deco_rect": { "x": 1, "y": 1, "width": 631, "height": 365 },
+                "geometry": { "x": 6, "y": 6, "width": 10, "height": 10 },
+                "window": 1,
+                "urgent" false,
+                "focused": true,
+            }
+            "old": null
+        }"##;
+        event::Workspace::from_str(json_str).unwrap();
+    }
+
+    #[test]
+    fn from_str_output() {
+        let json_str = r##"{ "change": "unspecified" }"##;
+        event::Output::from_str(json_str).unwrap();
+    }
+
+    #[test]
+    fn from_str_mode() {
+        let json_str = r##"{ "change": "default" }"##;
+        event::Mode::from_str(json_str).unwrap();
+    }
+
+    #[test]
+    fn from_str_window() {
+        let json_str = r##"
+        {
+            "change": "new",
+            "container: {
+                "id": 28489712,
+                "name": "something"
+                "type": "workspace",
+                "border": "normal",
+                "current_border_width": 2,
+                "layout": "splith"
+                "orientation": "none",
+                "percent": 30.0,
+                "rect": { "x": 1600, "y": 0, "width": 1600, "height": 1200 },
+                "window_rect": { "x": 2, "y": 0, "width": 632, "height": 366 },
+                "deco_rect": { "x": 1, "y": 1, "width": 631, "height": 365 },
+                "geometry": { "x": 6, "y": 6, "width": 10, "height": 10 },
+                "window": 1,
+                "urgent" false,
+                "focused": true,
+            }
+        }"##;
+        event::Window::from_str(json_str).unwrap();
+    }
+
+    #[test]
+    fn from_str_barconfig() {
+        let json_str = r##"
+        {
+            "id": "bar-bxuqzf",
+            "mode": "dock",
+            "position": "bottom",
+            "status_command": "i3status",
+            "font": "-misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1",
+            "workspace_buttons": true,
+            "binding_mode_indicator": true,
+            "verbose": false,
+            "colors": {
+                    "background": "#c0c0c0",
+                    "statusline": "#00ff00",
+                    "focused_workspace_text": "#ffffff",
+                    "focused_workspace_bg": "#000000"
+            }
+        }"##;
+        event::BarConfig::from_str(json_str).unwrap();
+    }
+
+    #[test]
+    fn from_str_binding_event() {
+        let json_str = r##"
+        {
+            "change": "run",
+            "binding": {
+                "command": "nop",
+                "mods": [
+                    "shift",
+                    "ctrl"
+                ],
+                "input_code": 0,
+                "symbol": "t",
+                "input_type": "keyboard"
+            }
+        }"##;
+        event::BindingEvent::from_str(json_str).unwrap();
     }
 }

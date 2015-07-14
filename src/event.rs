@@ -105,7 +105,7 @@ pub enum WindowChange {
 pub struct Window {
     /// Indicates the type of change
     pub change: WindowChange,
-    pub container: reply::Tree // FIXME: Figure out if the entire tree is passed or just the parent
+    pub container: reply::Tree
 }
 
 impl FromStr for Window {
