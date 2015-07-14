@@ -113,17 +113,17 @@ impl<'a> Iterator for EventIterator<'a> {
 }
 
 /// Abstraction over an ipc socket to i3. Handles events.
-pub struct I3EventHandler {
+pub struct I3EventListener {
     stream: UnixStream
 }
 
-impl I3EventHandler {
+impl I3EventListener {
     /// Establishes the IPC connection.
-    pub fn connect() -> Result<I3EventHandler, I3ConnectError> {
+    pub fn connect() -> Result<I3EventListener, I3ConnectError> {
         return match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
-                    Ok(stream) => Ok(I3EventHandler { stream: stream }),
+                    Ok(stream) => Ok(I3EventListener { stream: stream }),
                     Err(error) => Err(I3ConnectError::SocketError(error))
                 }
             }
@@ -319,7 +319,7 @@ impl I3Connection {
 #[cfg(test)]
 mod test {
     use I3Connection;
-    use I3EventHandler;
+    use I3EventListener;
     use event::EventType;
 
     // for the following tests send a request and get the reponse.
@@ -369,11 +369,6 @@ mod test {
     }
 
     #[test]
-    fn subscribe() {
-        I3EventHandler::connect().unwrap().subscribe(&[EventType::Workspace]).unwrap();
-    }
-
-    #[test]
     fn get_outputs() {
         I3Connection::connect().unwrap().get_outputs().unwrap();
     }
@@ -403,5 +398,10 @@ mod test {
     #[test]
     fn get_version() {
         I3Connection::connect().unwrap().get_version().unwrap();
+    }
+
+    #[test]
+    fn event_subscribe() {
+        I3EventListener::connect().unwrap().subscribe(&[EventType::Workspace]).unwrap();
     }
 }
