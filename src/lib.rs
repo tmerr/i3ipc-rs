@@ -11,6 +11,7 @@ use std::io::prelude::*;
 use std::collections::HashMap;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 use serde::json;
+use std::str::FromStr;
 
 mod readhelp;
 pub mod reply;
@@ -79,6 +80,19 @@ impl I3Funcs for UnixStream {
     }
 }
 
+/// the msgtype passed in should have its highest order bit stripped
+fn build_event(msgtype: u32, payload: &str) -> event::Event {
+    match msgtype {
+        0 => event::Event::EWorkspace(event::Workspace::from_str(payload).unwrap()),
+        1 => event::Event::EOutput(event::Output::from_str(payload).unwrap()),
+        2 => event::Event::EMode(event::Mode::from_str(payload).unwrap()),
+        3 => event::Event::EWindow(event::Window::from_str(payload).unwrap()),
+        4 => event::Event::EBarConfig(event::BarConfig::from_str(payload).unwrap()),
+        5 => event::Event::EBindingEvent(event::BindingEvent::from_str(payload).unwrap()),
+        _ => unreachable!()
+    }
+}
+
 pub struct EventIterator<'a> {
     stream: &'a mut UnixStream,
 }
@@ -87,11 +101,14 @@ impl<'a> Iterator for EventIterator<'a> {
     type Item = io::Result<event::Event>;
 
     fn next(&mut self) -> Option<Self::Item>{
-        let msg = self.stream.receive_i3_message();
-        if msg.is_err() {
-            return Some(Err(msg.err().unwrap()));
+        let result = self.stream.receive_i3_message();
+        if result.is_err() {
+            return Some(Err(result.err().unwrap()));
         }
-        panic!("not implemented");
+        let (msgint, payload) = result.unwrap();
+        // throw out the highest order bit of the message type. it just says it's an event.
+        let msgtype = (msgint << 1) >> 1;
+        Some(Ok(build_event(msgtype, &payload)))
     }
 }
 
@@ -115,7 +132,7 @@ impl I3EventHandler {
     }
 
     /// Subscribes your connection to certain events.
-    pub fn subscribe(&self, events: &[event::Event]) -> io::Result<reply::Subscribe> {
+    pub fn subscribe(&self, events: &[event::EventType]) -> io::Result<reply::Subscribe> {
         panic!("not implemented");
     }
 
@@ -303,7 +320,7 @@ impl I3Connection {
 mod test {
     use I3Connection;
     use I3EventHandler;
-    use Event;
+    use event::EventType;
 
     // for the following tests send a request and get the reponse.
     // response types are specific so often getting them at all indicates success.
@@ -353,7 +370,7 @@ mod test {
 
     #[test]
     fn subscribe() {
-        I3EventHandler::connect().unwrap().subscribe(&[Event::Workspace]).unwrap();
+        I3EventHandler::connect().unwrap().subscribe(&[EventType::Workspace]).unwrap();
     }
 
     #[test]

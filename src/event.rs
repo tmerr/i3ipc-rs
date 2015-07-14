@@ -1,6 +1,17 @@
 //! Abstractions for the events passed back from i3.
 
 use reply;
+use serde;
+use std::str::FromStr;
+
+pub enum EventType {
+    Workspace,
+    Output,
+    Mode,
+    Window,
+    BarConfig,
+    BindingEvent
+}
 
 pub enum Event {
     EWorkspace(Workspace),
@@ -31,6 +42,13 @@ pub struct Workspace {
     pub old: Option<reply::Workspace>
 }
 
+impl FromStr for Workspace {
+    type Err = serde::json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        panic!("not implemented");
+    }
+}
+
 /// Indicates the type of change (currently only unspecified).
 pub enum OutputChange {
     Unspecified
@@ -42,11 +60,25 @@ pub struct Output {
     pub change: OutputChange
 }
 
+impl FromStr for Output {
+    type Err = serde::json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        panic!("not implemented");
+    }
+}
+
 /// The data for the mode event.
 pub struct Mode {
     /// The name of current mode in use. It is the same as specified in config when creating a
     /// mode. The default mode is simply named default.
     pub change: String
+}
+
+impl FromStr for Mode {
+    type Err = serde::json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        panic!("not implemented");
+    }
 }
 
 /// The type of the window change.
@@ -76,8 +108,22 @@ pub struct Window {
     pub container: reply::Tree // FIXME: Figure out if the entire tree is passed or just the parent
 }
 
+impl FromStr for Window {
+    type Err = serde::json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        panic!("not implemented");
+    }
+}
+
 /// The data for the barconfig_update event.
 pub type BarConfig = reply::BarConfig;
+
+impl FromStr for BarConfig {
+    type Err = serde::json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        panic!("not implemented");
+    }
+}
 
 pub enum InputType {
     Keyboard,
@@ -118,4 +164,11 @@ pub struct BindingEvent {
     /// that may be expanded in the future).
     pub change: BindingEventChange,
     pub binding: Binding
+}
+
+impl FromStr for BindingEvent {
+    type Err = serde::json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        panic!("not implemented");
+    }
 }
