@@ -16,15 +16,6 @@ mod readhelp;
 pub mod reply;
 pub mod event;
 
-pub enum Event {
-    Workspace,
-    Output,
-    Mode,
-    Window,
-    BarConfigUpdate,
-    Binding
-}
-
 /// An error while instantiating an I3Connection. Creating an I3Connection involves first getting
 /// the i3 socket path, then connecting to the socket. Either part could go wrong, which is why
 /// there are two possibilities here.
@@ -93,7 +84,7 @@ pub struct EventIterator<'a> {
 }
 
 impl<'a> Iterator for EventIterator<'a> {
-    type Item = io::Result<Event>;
+    type Item = io::Result<event::Event>;
 
     fn next(&mut self) -> Option<Self::Item>{
         let msg = self.stream.receive_i3_message();
@@ -124,7 +115,7 @@ impl I3EventHandler {
     }
 
     /// Subscribes your connection to certain events.
-    pub fn subscribe(&self, events: &[Event]) -> io::Result<reply::Subscribe> {
+    pub fn subscribe(&self, events: &[event::Event]) -> io::Result<reply::Subscribe> {
         panic!("not implemented");
     }
 

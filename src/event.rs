@@ -2,6 +2,15 @@
 
 use reply;
 
+pub enum Event {
+    EWorkspace(Workspace),
+    EOutput(Output),
+    EMode(Mode),
+    EWindow(Window),
+    EBarConfig(BarConfig),
+    EBindingEvent(BindingEvent),
+}
+
 /// Indicates the type of change.
 pub enum WorkspaceChange {
     Focus,
