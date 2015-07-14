@@ -14,6 +14,7 @@ use serde::json;
 
 mod readhelp;
 pub mod reply;
+pub mod event;
 
 pub enum Event {
     Workspace,
@@ -87,23 +88,21 @@ impl I3Funcs for UnixStream {
     }
 }
 
-/*
 pub struct EventIterator<'a> {
     stream: &'a mut UnixStream,
 }
 
-impl<'a> Iterator for EventIterator {
+impl<'a> Iterator for EventIterator<'a> {
     type Item = io::Result<Event>;
 
     fn next(&mut self) -> Option<Self::Item>{
-        panic!("fuck");
-        /*
-        fn get_message() -> io::Result<Event> {
-            let msg = try!(stream.receive_i3_message());
-        }*/
+        let msg = self.stream.receive_i3_message();
+        if msg.is_err() {
+            return Some(Err(msg.err().unwrap()));
+        }
+        panic!("not implemented");
     }
 }
-*/
 
 /// Abstraction over an ipc socket to i3. Handles events.
 pub struct I3EventHandler {
