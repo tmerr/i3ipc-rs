@@ -107,6 +107,6 @@ pub enum BindingEventChange {
 pub struct BindingEvent {
     /// Indicates what sort of binding event was triggered (right now it will always be "run" but
     /// that may be expanded in the future).
-    change: BindingEventChange,
-
+    pub change: BindingEventChange,
+    pub binding: Binding
 }
