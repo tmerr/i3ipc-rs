@@ -15,7 +15,13 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             None => vec![]
         },
         id: val.find("id").unwrap().as_i64().unwrap() as i32,
-        name: val.find("name").unwrap().as_string().unwrap().to_owned(),
+        name: match val.find("name") {
+            Some(n) => match n.as_string() {
+                Some(s) => Some(s.to_owned()),
+                None => None
+            },
+            None => None
+        },
         nodetype: match val.find("type").unwrap().as_string().unwrap().as_ref() {
             "root" => reply::NodeType::Root,
             "output" => reply::NodeType::Output,

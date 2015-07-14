@@ -108,7 +108,7 @@ pub struct Node {
     /// the container. For containers that have an X11 window, the content is the title
     /// (_NET_WM_NAME property) of that window. For all other containers, the content is not
     /// defined (yet).
-    pub name: String,
+    pub name: Option<String>,
 
     /// Type of this container. Can be one of "root", "output", "con", "floating_con",
     /// "workspace" or "dockarea". 
