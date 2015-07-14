@@ -96,20 +96,15 @@ pub struct Tree {
 
     /// Number of pixels of the border width.
     pub current_border_width: i32,
-    /// Can be either "none" (for non-split containers), "horizontal" or "vertical". THIS FIELD
-    /// IS OBSOLETE. It is still present, but your code should not use it. Instead, rely on the
-    /// layout field.
-    pub layout: String,
 
-    /// Can be either "none" (for non-split containers), "horizontal" or "vertical". THIS FIELD
-    /// IS OBSOLETE. It is still present, but your code should not use it. Instead, rely on the
-    /// layout field. 
-    pub orientation: String,
+    /// Can be either "splith", "splitv", "stacked", "tabbed", "dockarea" or "output". Other values
+    /// might be possible in the future, should we add new layouts.
+    pub layout: String,
 
     /// The percentage which this container takes in its parent. A value of null means that the
     /// percent property does not make sense for this container, for example for the root
     /// container. 
-    pub percent: f64,
+    pub percent: Option<f64>,
 
     /// The (x, y, width, height) absolute display coordinates for this container. Display
     /// coordinates means that when you have two 1600x1200 monitors on a single X11 Display
