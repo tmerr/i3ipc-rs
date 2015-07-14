@@ -12,12 +12,15 @@ use std::collections::HashMap;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 use serde::json;
 use std::str::FromStr;
+use event::Event;
 
 mod readhelp;
 pub mod reply;
 pub mod event;
 
-/// An error while instantiating an I3Connection. Creating an I3Connection involves first getting
+/// An error while instantiating an `I3Connection`.
+///
+/// Creating an I3Connection involves first getting
 /// the i3 socket path, then connecting to the socket. Either part could go wrong, which is why
 /// there are two possibilities here.
 #[derive(Debug)]
@@ -83,12 +86,12 @@ impl I3Funcs for UnixStream {
 /// the msgtype passed in should have its highest order bit stripped
 fn build_event(msgtype: u32, payload: &str) -> event::Event {
     match msgtype {
-        0 => event::Event::EWorkspace(event::Workspace::from_str(payload).unwrap()),
-        1 => event::Event::EOutput(event::Output::from_str(payload).unwrap()),
-        2 => event::Event::EMode(event::Mode::from_str(payload).unwrap()),
-        3 => event::Event::EWindow(event::Window::from_str(payload).unwrap()),
-        4 => event::Event::EBarConfig(event::BarConfig::from_str(payload).unwrap()),
-        5 => event::Event::EBindingEvent(event::BindingEvent::from_str(payload).unwrap()),
+        0 => event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload).unwrap()),
+        1 => event::Event::OutputEvent(event::OutputEventInfo::from_str(payload).unwrap()),
+        2 => event::Event::ModeEvent(event::ModeEventInfo::from_str(payload).unwrap()),
+        3 => event::Event::WindowEvent(event::WindowEventInfo::from_str(payload).unwrap()),
+        4 => event::Event::BarConfigEvent(event::BarConfigEventInfo::from_str(payload).unwrap()),
+        5 => event::Event::BindingEvent(event::BindingEventInfo::from_str(payload).unwrap()),
         _ => unreachable!()
     }
 }
@@ -112,6 +115,16 @@ impl<'a> Iterator for EventIterator<'a> {
     }
 }
 
+/// A subscription for `I3EventListener`
+pub enum Subscription {
+    Workspace,
+    Output,
+    Mode,
+    Window,
+    BarConfig,
+    BindingEvent
+}
+
 /// Abstraction over an ipc socket to i3. Handles events.
 pub struct I3EventListener {
     stream: UnixStream
@@ -132,7 +145,7 @@ impl I3EventListener {
     }
 
     /// Subscribes your connection to certain events.
-    pub fn subscribe(&self, events: &[event::EventType]) -> io::Result<reply::Subscribe> {
+    pub fn subscribe(&self, events: &[Subscription]) -> io::Result<reply::Subscribe> {
         panic!("not implemented");
     }
 
