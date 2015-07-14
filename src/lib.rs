@@ -242,7 +242,68 @@ impl I3Connection {
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.
     pub fn get_tree(&mut self) -> io::Result<reply::Node> {
-        panic!("not implemented");
+        fn recurse(val: &json::Value) -> reply::Node {
+            reply::Node {
+                nodes: match val.find("nodes") {
+                    Some(nds) => nds.as_array()
+                                    .unwrap()
+                                    .iter()
+                                    .map(|n| recurse(n))
+                                    .collect::<Vec<_>>(),
+                    None => vec![]
+                },
+                id: val.find("id").unwrap().as_i64().unwrap() as i32,
+                name: val.find("name").unwrap().as_string().unwrap().to_owned(),
+                nodetype: match val.find("type").unwrap().as_string().unwrap().as_ref() {
+                    "root" => reply::NodeType::Root,
+                    "output" => reply::NodeType::Output,
+                    "con" => reply::NodeType::Con,
+                    "floating_con" => reply::NodeType::FloatingCon,
+                    "workspace" => reply::NodeType::Workspace,
+                    "dockarea" => reply::NodeType::DockArea,
+                    _ => unreachable!()
+                },
+                border: match val.find("border").unwrap().as_string().unwrap().as_ref() {
+                    "normal" => reply::NodeBorder::Normal,
+                    "none" => reply::NodeBorder::None,
+                    "1pixel" => reply::NodeBorder::OnePixel,
+                    _ => unreachable!()
+                },
+                current_border_width: val.find("current_border_width").unwrap().as_i64().unwrap() as i32,
+                layout: match val.find("layout").unwrap().as_string().unwrap().as_ref() {
+                    "splith" => reply::NodeLayout::SplitH,
+                    "splitv" => reply::NodeLayout::SplitV,
+                    "stacked" => reply::NodeLayout::Stacked,
+                    "tabbed" => reply::NodeLayout::Tabbed,
+                    "dockarea" => reply::NodeLayout::DockArea,
+                    "output" => reply::NodeLayout::Output,
+                    _ => unreachable!()
+                },
+                percent: match *val.find("percent").unwrap() {
+                    json::Value::F64(f) => Some(f),
+                    json::Value::Null => None,
+                    _ => unreachable!()
+                },
+                rect: I3Connection::unpack_rect(val.find("rect").unwrap()),
+                window_rect: I3Connection::unpack_rect(val.find("window_rect").unwrap()),
+                deco_rect: I3Connection::unpack_rect(val.find("deco_rect").unwrap()),
+                geometry: I3Connection::unpack_rect(val.find("geometry").unwrap()),
+                window: match val.find("window").unwrap().clone() {
+                    json::Value::I64(i) => Some(i as i32),
+                    json::Value::U64(u) => Some(u as i32),
+                    json::Value::Null => None,
+                    _ => unreachable!()
+                },
+                urgent: val.find("urgent").unwrap().as_boolean().unwrap(),
+                focused: val.find("focused").unwrap().as_boolean().unwrap(),
+                undocumented: HashMap::new() // TODO: implement.
+            }
+        }
+
+        try!(self.stream.send_i3_message(4, ""));
+        let (_, payload) = try!(self.stream.receive_i3_message());
+        let val: json::Value = json::from_str(&payload).unwrap();
+        Ok(recurse(&val))
     }
 
     /// Gets a list of marks (identifiers for containers to easily jump to them later).

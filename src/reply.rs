@@ -69,10 +69,34 @@ pub struct Outputs {
     pub outputs: Vec<Output>
 }
 
+pub enum NodeType {
+    Root,
+    Output,
+    Con,
+    FloatingCon,
+    Workspace,
+    DockArea
+}
+
+pub enum NodeBorder {
+    Normal,
+    None,
+    OnePixel
+}
+
+pub enum NodeLayout {
+    SplitH,
+    SplitV,
+    Stacked,
+    Tabbed,
+    DockArea,
+    Output
+}
+
 /// The reply to the `get_tree` request.
 pub struct Node {
     /// The child nodes of this container.
-    pub children: Vec<Node>,
+    pub nodes: Vec<Node>,
 
     /// The internal ID (actually a C pointer value) of this container. Do not make any
     /// assumptions about it. You can use it to (re-)identify and address containers when
@@ -88,18 +112,18 @@ pub struct Node {
 
     /// Type of this container. Can be one of "root", "output", "con", "floating_con",
     /// "workspace" or "dockarea". 
-    pub treetype: String,
+    pub nodetype: NodeType,
 
     /// Can be either "normal", "none" or "1pixel", dependending on the container’s border
     /// style. 
-    pub border: String,
+    pub border: NodeBorder,
 
     /// Number of pixels of the border width.
     pub current_border_width: i32,
 
     /// Can be either "splith", "splitv", "stacked", "tabbed", "dockarea" or "output". Other values
     /// might be possible in the future, should we add new layouts.
-    pub layout: String,
+    pub layout: NodeLayout,
 
     /// The percentage which this container takes in its parent. A value of null means that the
     /// percent property does not make sense for this container, for example for the root
@@ -131,7 +155,7 @@ pub struct Node {
     /// The X11 window ID of the actual client window inside this container. This field is set
     /// to null for split containers or otherwise empty containers. This ID corresponds to what
     /// xwininfo(1) and other X11-related tools display (usually in hex). 
-    pub window: i32,
+    pub window: Option<i32>,
 
     /// Whether this container (window or workspace) has the urgency hint set. 
     pub urgent: bool,
@@ -140,6 +164,7 @@ pub struct Node {
     pub focused: bool,
 
     /// Any undocumented properties. These are not yet finalized and will probably change!
+    /// TODO: Implement this.
     pub undocumented: HashMap<String, String>
 }
 
