@@ -241,7 +241,7 @@ impl I3Connection {
     }
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.
-    pub fn get_tree(&mut self) -> io::Result<reply::Tree> {
+    pub fn get_tree(&mut self) -> io::Result<reply::Node> {
         panic!("not implemented");
     }
 

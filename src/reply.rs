@@ -70,9 +70,9 @@ pub struct Outputs {
 }
 
 /// The reply to the `get_tree` request.
-pub struct Tree {
+pub struct Node {
     /// The child nodes of this container.
-    pub children: Vec<Tree>,
+    pub children: Vec<Node>,
 
     /// The internal ID (actually a C pointer value) of this container. Do not make any
     /// assumptions about it. You can use it to (re-)identify and address containers when

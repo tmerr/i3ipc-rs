@@ -35,11 +35,11 @@ pub struct Workspace {
     /// The type of change.
     pub change: WorkspaceChange,
     /// Will be `Some` if the type of event affects the workspace.
-    pub current: Option<reply::Tree>,
+    pub current: Option<reply::Node>,
     /// Will be `Some` only when `change == Focus` *and* there was a previous workspace.
     /// Note that if the previous workspace was empty it will get destroyed when switching, but
     /// will still appear here.
-    pub old: Option<reply::Tree>
+    pub old: Option<reply::Node>
 }
 
 impl FromStr for Workspace {
@@ -105,7 +105,7 @@ pub enum WindowChange {
 pub struct Window {
     /// Indicates the type of change
     pub change: WindowChange,
-    pub container: reply::Tree
+    pub container: reply::Node
 }
 
 impl FromStr for Window {
