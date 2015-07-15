@@ -166,7 +166,7 @@ impl I3EventListener {
         Ok(reply::Subscribe { success: is_success })
     }
 
-    /// Iterates over 
+    /// Iterates over subscribed events.
     pub fn events() {
     }
 }
@@ -177,7 +177,6 @@ pub struct I3Connection {
 }
 
 impl I3Connection {
-
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3Connection, I3ConnectError> {
         return match get_socket_path() {

@@ -265,7 +265,7 @@ pub struct BarConfig {
     pub verbose: bool,
 
     /// Contains key/value pairs of colors. Each value is a color code in hex, formatted
-    /// #rrggbb (like in HTML).
+    /// \#rrggbb (like in HTML).
     pub colors: HashMap<ColorableBarPart, String>,
 }
 
