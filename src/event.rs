@@ -96,13 +96,30 @@ impl FromStr for ModeEventInfo {
 pub struct WindowEventInfo {
     /// Indicates the type of change
     pub change: WindowChange,
+    /// The window's parent container. Be aware that for the "new" event, the container will hold
+    /// the initial name of the newly reparented window (e.g. if you run urxvt with a shell that
+    /// changes the title, you will still at this point get the window title as "urxvt").
     pub container: reply::Node
 }
 
 impl FromStr for WindowEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        panic!("not implemented");
+        let val: json::Value = try!(json::from_str(s));
+        Ok(WindowEventInfo {
+            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+                "new" => WindowChange::New,
+                "close" => WindowChange::Close,
+                "focus" => WindowChange::Focus,
+                "title" => WindowChange::Title,
+                "fullscreen_mode" => WindowChange::FullscreenMode,
+                "move" => WindowChange::Move,
+                "floating" => WindowChange::Floating,
+                "urgent" => WindowChange::Urgent,
+                _ => unreachable!()
+            },
+            container: common::build_tree(val.find("container").unwrap())
+        })
     }
 }
 

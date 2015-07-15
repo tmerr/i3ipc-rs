@@ -460,7 +460,7 @@ mod test {
         let json_str = r##"
         {
             "change": "new",
-            "container: {
+            "container": {
                 "id": 28489712,
                 "name": "something",
                 "type": "workspace",
