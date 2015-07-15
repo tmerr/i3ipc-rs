@@ -8,7 +8,6 @@ use std::process;
 use unix_socket::UnixStream;
 use std::io;
 use std::io::prelude::*;
-use std::collections::HashMap;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 use serde::json;
 use std::str::FromStr;
@@ -84,19 +83,6 @@ impl I3Funcs for UnixStream {
     }
 }
 
-/// the msgtype passed in should have its highest order bit stripped
-fn build_event(msgtype: u32, payload: &str) -> event::Event {
-    match msgtype {
-        0 => event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload).unwrap()),
-        1 => event::Event::OutputEvent(event::OutputEventInfo::from_str(payload).unwrap()),
-        2 => event::Event::ModeEvent(event::ModeEventInfo::from_str(payload).unwrap()),
-        3 => event::Event::WindowEvent(event::WindowEventInfo::from_str(payload).unwrap()),
-        4 => event::Event::BarConfigEvent(event::BarConfigEventInfo::from_str(payload).unwrap()),
-        5 => event::Event::BindingEvent(event::BindingEventInfo::from_str(payload).unwrap()),
-        _ => unreachable!()
-    }
-}
-
 pub struct EventIterator<'a> {
     stream: &'a mut UnixStream,
 }
@@ -105,6 +91,19 @@ impl<'a> Iterator for EventIterator<'a> {
     type Item = io::Result<event::Event>;
 
     fn next(&mut self) -> Option<Self::Item>{
+        /// the msgtype passed in should have its highest order bit stripped
+        fn build_event(msgtype: u32, payload: &str) -> event::Event {
+            match msgtype {
+                0 => event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload).unwrap()),
+                1 => event::Event::OutputEvent(event::OutputEventInfo::from_str(payload).unwrap()),
+                2 => event::Event::ModeEvent(event::ModeEventInfo::from_str(payload).unwrap()),
+                3 => event::Event::WindowEvent(event::WindowEventInfo::from_str(payload).unwrap()),
+                4 => event::Event::BarConfigEvent(event::BarConfigEventInfo::from_str(payload).unwrap()),
+                5 => event::Event::BindingEvent(event::BindingEventInfo::from_str(payload).unwrap()),
+                _ => unreachable!()
+            }
+        }
+
         let result = self.stream.receive_i3_message();
         if result.is_err() {
             return Some(Err(result.err().unwrap()));
@@ -123,7 +122,7 @@ pub enum Subscription {
     Mode,
     Window,
     BarConfig,
-    BindingEvent
+    Binding
 }
 
 /// Abstraction over an ipc socket to i3. Handles events.
@@ -146,8 +145,25 @@ impl I3EventListener {
     }
 
     /// Subscribes your connection to certain events.
-    pub fn subscribe(&self, events: &[Subscription]) -> io::Result<reply::Subscribe> {
-        panic!("not implemented");
+    pub fn subscribe(&mut self, events: &[Subscription]) -> io::Result<reply::Subscribe> {
+        let json =
+            "[ ".to_owned()
+            + &events.iter()
+                    .map(|s| match *s {
+                        Subscription::Workspace => "\"workspace\"",
+                        Subscription::Output => "\"output\"",
+                        Subscription::Mode => "\"mode\"",
+                        Subscription::Window => "\"window\"",
+                        Subscription::BarConfig => "\"barconfig_update\"",
+                        Subscription::Binding => "\"binding\""})
+                    .collect::<Vec<_>>()
+                    .connect(", ")[..]
+            + " ]";
+        try!(self.stream.send_i3_message(2, &json));
+        let (_, payload) = try!(self.stream.receive_i3_message());
+        let j: json::Value = json::from_str(&payload).unwrap();
+        let is_success = j.find("success").unwrap().as_boolean().unwrap();
+        Ok(reply::Subscribe { success: is_success })
     }
 
     /// Iterates over 
@@ -372,7 +388,7 @@ mod test {
     fn get_bar_ids_and_one_config() {
         let mut connection = I3Connection::connect().unwrap();
         let ids = connection.get_bar_ids().unwrap().ids;
-        let oneconfig = connection.get_bar_config(&ids[0]).unwrap();
+        connection.get_bar_config(&ids[0]).unwrap();
     }
 
     #[test]
@@ -382,7 +398,8 @@ mod test {
 
     #[test]
     fn event_subscribe() {
-        I3EventListener::connect().unwrap().subscribe(&[Subscription::Workspace]).unwrap();
+        let s = I3EventListener::connect().unwrap().subscribe(&[Subscription::Workspace]).unwrap();
+        assert_eq!(s.success, true);
     }
 
     #[test]
