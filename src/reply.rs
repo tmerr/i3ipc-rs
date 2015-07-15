@@ -63,6 +63,7 @@ pub struct Output {
     /// x, y, width, height.
     pub rect: (i32, i32, i32, i32)
 }
+
 /// The reply to the `get_outputs` request.
 pub struct Outputs {
     /// A list of outputs (displays)

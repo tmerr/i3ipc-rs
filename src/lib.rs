@@ -92,6 +92,7 @@ impl<'a> Iterator for EventIterator<'a> {
 
     fn next(&mut self) -> Option<Self::Item>{
         /// the msgtype passed in should have its highest order bit stripped
+        /// makes the i3 event
         fn build_event(msgtype: u32, payload: &str) -> event::Event {
             match msgtype {
                 0 => event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload).unwrap()),
@@ -166,8 +167,9 @@ impl I3EventListener {
         Ok(reply::Subscribe { success: is_success })
     }
 
-    /// Iterates over subscribed events.
-    pub fn events() {
+    /// Iterates over subscribed events forever.
+    pub fn listen(&mut self) -> EventIterator {
+        EventIterator { stream: &mut self.stream }
     }
 }
 
