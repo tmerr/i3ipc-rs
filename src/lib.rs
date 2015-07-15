@@ -275,38 +275,7 @@ impl I3Connection {
         try!(self.stream.send_i3_message(6, id));
         let (_, payload) = try!(self.stream.receive_i3_message());
         let j: json::Value = json::from_str(&payload).unwrap();
-        Ok(reply::BarConfig {
-            id: j.find("id").unwrap().as_string().unwrap().to_owned(),
-            mode: j.find("mode").unwrap().as_string().unwrap().to_owned(),
-            position: j.find("position").unwrap().as_string().unwrap().to_owned(),
-            status_command: j.find("status_command").unwrap().as_string().unwrap().to_owned(),
-            font: j.find("font").unwrap().as_string().unwrap().to_owned(),
-            workspace_buttons: j.find("workspace_buttons").unwrap().as_boolean().unwrap(),
-            binding_mode_indicator: j.find("binding_mode_indicator").unwrap().as_boolean().unwrap(),
-            verbose: j.find("verbose").unwrap().as_boolean().unwrap(),
-            colors: {
-                let colors = j.find("colors").unwrap().as_object().unwrap();
-                let mut map = HashMap::new();
-                for c in colors.keys() {
-                    let enum_key = match c.as_ref() {
-                        "background" => reply::ColorableBarPart::Background,
-                        "statusline" => reply::ColorableBarPart::Statusline,
-                        "separator" => reply::ColorableBarPart::Separator,
-                        "focused_workspace_text" => reply::ColorableBarPart::FocusedWorkspaceText,
-                        "focused_workspace_bg" => reply::ColorableBarPart::FocusedWorkspaceBg,
-                        "active_workspace_bg" => reply::ColorableBarPart::ActiveWorkspaceBg,
-                        "inactive_workspace_text" => reply::ColorableBarPart::InactiveWorkspaceText,
-                        "inactive_workspace_bg" => reply::ColorableBarPart::InactiveWorkspaceBg,
-                        "urgent_workspace_text" => reply::ColorableBarPart::UrgentWorkspaceText,
-                        "urgent_workspace_bar" => reply::ColorableBarPart::UrgentWorkspaceBar,
-                        other => reply::ColorableBarPart::Undocumented(other.to_owned())
-                    };
-                    let hex = colors.get(c).unwrap().as_string().unwrap().to_owned();
-                    map.insert(enum_key, hex);
-                }
-                map
-            }
-        })
+        Ok(common::build_bar_config(&j))
     }
 
     /// Gets the version of i3. The reply will include the major, minor, patch and human-readable

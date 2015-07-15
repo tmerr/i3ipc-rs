@@ -132,7 +132,10 @@ pub struct BarConfigEventInfo {
 impl FromStr for BarConfigEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        panic!("not implemented");
+        let val: json::Value = try!(json::from_str(s));
+        Ok(BarConfigEventInfo {
+            bar_config: common::build_bar_config(&val)
+        })
     }
 }
 
