@@ -63,8 +63,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             _ => unreachable!()
         },
         urgent: val.find("urgent").unwrap().as_boolean().unwrap(),
-        focused: val.find("focused").unwrap().as_boolean().unwrap(),
-        undocumented: HashMap::new() // TODO: implement.
+        focused: val.find("focused").unwrap().as_boolean().unwrap()
     }
 }
 

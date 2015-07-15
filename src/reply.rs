@@ -175,10 +175,6 @@ pub struct Node {
 
     /// Whether this container is currently focused.
     pub focused: bool,
-
-    /// Any undocumented properties. These are not yet finalized and will probably change!
-    /// TODO: Implement this.
-    pub undocumented: HashMap<String, String>
 }
 
 /// The reply to the `get_marks` request.
