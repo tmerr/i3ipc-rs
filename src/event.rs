@@ -152,7 +152,32 @@ pub struct BindingEventInfo {
 impl FromStr for BindingEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        panic!("not implemented");
+        let val: json::Value = try!(json::from_str(s));
+        let bind = val.find("binding").unwrap();
+        Ok(BindingEventInfo {
+            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+                "run" => BindingChange::Run,
+                _ => unreachable!()
+            },
+            binding: Binding {
+                command: bind.find("command").unwrap().as_string().unwrap().to_owned(),
+                mods: bind.find("mods").unwrap()
+                         .as_array().unwrap().iter()
+                         .map(|m| m.as_string().unwrap().to_owned())
+                         .collect(),
+                input_code: bind.find("input_code").unwrap().as_i64().unwrap() as i32,
+                symbol: match bind.find("symbol").unwrap().clone() {
+                    json::Value::String(s) => Some(s),
+                    json::Value::Null => None,
+                    _ => unreachable!()
+                },
+                input_type: match bind.find("input_type").unwrap().as_string().unwrap().as_ref() {
+                    "keyboard" => InputType::Keyboard,
+                    "mouse" => InputType::Mouse,
+                    _ => unreachable!()
+                }
+            }
+        })
     }
 }
 
