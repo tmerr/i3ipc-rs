@@ -423,11 +423,11 @@ mod test {
             "change": "focus",
             "current": {
                 "id": 28489712,
-                "name": "something"
+                "name": "something",
                 "type": "workspace",
                 "border": "normal",
                 "current_border_width": 2,
-                "layout": "splith"
+                "layout": "splith",
                 "orientation": "none",
                 "percent": 30.0,
                 "rect": { "x": 1600, "y": 0, "width": 1600, "height": 1200 },
@@ -435,9 +435,9 @@ mod test {
                 "deco_rect": { "x": 1, "y": 1, "width": 631, "height": 365 },
                 "geometry": { "x": 6, "y": 6, "width": 10, "height": 10 },
                 "window": 1,
-                "urgent" false,
-                "focused": true,
-            }
+                "urgent": false,
+                "focused": true
+            },
             "old": null
         }"##;
         event::WorkspaceEventInfo::from_str(json_str).unwrap();
@@ -462,11 +462,11 @@ mod test {
             "change": "new",
             "container: {
                 "id": 28489712,
-                "name": "something"
+                "name": "something",
                 "type": "workspace",
                 "border": "normal",
                 "current_border_width": 2,
-                "layout": "splith"
+                "layout": "splith",
                 "orientation": "none",
                 "percent": 30.0,
                 "rect": { "x": 1600, "y": 0, "width": 1600, "height": 1200 },
@@ -474,8 +474,8 @@ mod test {
                 "deco_rect": { "x": 1, "y": 1, "width": 631, "height": 365 },
                 "geometry": { "x": 6, "y": 6, "width": 10, "height": 10 },
                 "window": 1,
-                "urgent" false,
-                "focused": true,
+                "urgent": false,
+                "focused": true
             }
         }"##;
         event::WindowEventInfo::from_str(json_str).unwrap();
