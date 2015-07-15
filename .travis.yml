@@ -1,0 +1,11 @@
+language: rust
+sudo: false
+rust:
+  - beta
+  - stable
+  - nightly
+script:
+  - cargo build
+  - cargo doc
+  # can't cargo test for now
+  # since it relies on i3 being installed
