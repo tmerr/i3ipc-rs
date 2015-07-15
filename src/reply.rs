@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 
 /// The outcome of a single command.
+#[derive(Debug)]
 pub struct CommandOutcome {
     /// Whether the command was successful.
     pub success: bool,
@@ -11,12 +12,14 @@ pub struct CommandOutcome {
 }
 
 /// The reply to the `command` request.
+#[derive(Debug)]
 pub struct Command {
     /// A list of `CommandOutcome` structs; one for each command that was parsed.
     pub outcomes: Vec<CommandOutcome>
 }
 
 /// A single workspace.
+#[derive(Debug)]
 pub struct Workspace {
     /// The logical number of the workspace. Corresponds to the command to switch to this
     /// workspace. For named workspaces, this will be -1.
@@ -37,13 +40,16 @@ pub struct Workspace {
     /// The video output this workspace is on (LVDS1, VGA1, …).
     pub output: String
 }
+
 /// The reply to the `get_workspaces` request.
+#[derive(Debug)]
 pub struct Workspaces {
     /// A list of workspaces.
     pub workspaces: Vec<Workspace>,
 }
 
 /// The reply to the `subscribe` request.
+#[derive(Debug)]
 pub struct Subscribe {
     /// Indicates whether the subscription was successful (the default) or whether a JSON
     /// parse error occurred.
@@ -51,6 +57,7 @@ pub struct Subscribe {
 }
 
 /// A single output (display)
+#[derive(Debug)]
 pub struct Output {
     /// The name of this output (as seen in xrandr).
     pub name: String,
@@ -65,11 +72,13 @@ pub struct Output {
 }
 
 /// The reply to the `get_outputs` request.
+#[derive(Debug)]
 pub struct Outputs {
     /// A list of outputs (displays)
     pub outputs: Vec<Output>
 }
 
+#[derive(Debug)]
 pub enum NodeType {
     Root,
     Output,
@@ -79,12 +88,14 @@ pub enum NodeType {
     DockArea
 }
 
+#[derive(Debug)]
 pub enum NodeBorder {
     Normal,
     None,
     OnePixel
 }
 
+#[derive(Debug)]
 pub enum NodeLayout {
     SplitH,
     SplitV,
@@ -95,6 +106,7 @@ pub enum NodeLayout {
 }
 
 /// The reply to the `get_tree` request.
+#[derive(Debug)]
 pub struct Node {
     /// The child nodes of this container.
     pub nodes: Vec<Node>,
@@ -174,6 +186,7 @@ pub struct Node {
 /// Consists of a single vector of strings for each container that has a mark. A mark can only
 /// be set on one container, so the vector is unique. The order of that vector is undefined. If
 /// no window has a mark the response will be an empty vector.
+#[derive(Debug)]
 pub struct Marks {
     pub marks: Vec<String>
 }
@@ -182,12 +195,13 @@ pub struct Marks {
 ///
 /// This can be used by third-party workspace bars (especially i3bar, but others are free to
 /// implement compatible alternatives) to get the bar block configuration from i3.
+#[derive(Debug)]
 pub struct BarIds {
     /// A vector of configured bar IDs.
     pub ids: Vec<String>
 }
 
-#[derive(Hash, Eq, PartialEq)]
+#[derive(Hash, Eq, PartialEq, Debug)]
 pub enum ColorableBarPart {
     /// Background color of the bar.
     Background,
@@ -237,6 +251,7 @@ pub enum ColorableBarPart {
 ///
 /// This can be used by third-party workspace bars (especially i3bar, but others are free to
 /// implement compatible alternatives) to get the bar block configuration from i3.
+#[derive(Debug)]
 pub struct BarConfig {
     /// The ID for this bar. Included in case you request multiple configurations and want to
     /// differentiate the different replies.
@@ -271,6 +286,7 @@ pub struct BarConfig {
 }
 
 /// The reply to the `get_version` request.
+#[derive(Debug)]
 pub struct Version {
     /// The major version of i3, such as 4. 
     pub major: i32,

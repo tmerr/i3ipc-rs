@@ -8,6 +8,7 @@ use common;
 use event::inner::*;
 
 /// An event passed back from i3.
+#[derive(Debug)]
 pub enum Event {
     WorkspaceEvent(WorkspaceEventInfo),
     OutputEvent(OutputEventInfo),
@@ -18,6 +19,7 @@ pub enum Event {
 }
 
 /// Data for `WorkspaceEvent`.
+#[derive(Debug)]
 pub struct WorkspaceEventInfo {
     /// The type of change.
     pub change: WorkspaceChange,
@@ -57,6 +59,7 @@ impl FromStr for WorkspaceEventInfo {
 }
 
 /// Data for `OutputEvent`.
+#[derive(Debug)]
 pub struct OutputEventInfo {
     /// The type of change.
     pub change: OutputChange
@@ -76,6 +79,7 @@ impl FromStr for OutputEventInfo {
 }
 
 /// Data for `ModeEvent`.
+#[derive(Debug)]
 pub struct ModeEventInfo {
     /// The name of current mode in use. It is the same as specified in config when creating a
     /// mode. The default mode is simply named default.
@@ -93,6 +97,7 @@ impl FromStr for ModeEventInfo {
 }
 
 /// Data for `WindowEvent`.
+#[derive(Debug)]
 pub struct WindowEventInfo {
     /// Indicates the type of change
     pub change: WindowChange,
@@ -124,6 +129,7 @@ impl FromStr for WindowEventInfo {
 }
 
 /// Data for `BarConfigEvent`.
+#[derive(Debug)]
 pub struct BarConfigEventInfo {
     /// The new i3 bar configuration.
     pub bar_config: reply::BarConfig
@@ -142,6 +148,7 @@ impl FromStr for BarConfigEventInfo {
 /// Data for `BindingEvent`.
 ///
 /// Reports on the details of a binding that ran a command because of user input.
+#[derive(Debug)]
 pub struct BindingEventInfo {
     /// Indicates what sort of binding event was triggered (right now it will always be "run" but
     /// that may be expanded in the future).
@@ -184,6 +191,7 @@ impl FromStr for BindingEventInfo {
 /// Less important types
 pub mod inner {
     /// The kind of workspace change.
+    #[derive(Debug)]
     pub enum WorkspaceChange {
         Focus,
         Init,
@@ -192,11 +200,13 @@ pub mod inner {
     }
 
     /// The kind of output change.
+    #[derive(Debug)]
     pub enum OutputChange {
         Unspecified
     }
 
     /// The kind of window change.
+    #[derive(Debug)]
     pub enum WindowChange {
         /// The window has become managed by i3.
         New,
@@ -217,12 +227,14 @@ pub mod inner {
     }
 
     /// Either keyboard or mouse.
+    #[derive(Debug)]
     pub enum InputType {
         Keyboard,
         Mouse
     }
 
     /// Contains details about the binding that was run.
+    #[derive(Debug)]
     pub struct Binding {
         /// The i3 command that is configured to run for this binding.
         pub command: String,
@@ -244,6 +256,7 @@ pub mod inner {
     }
 
     /// The kind of binding change.
+    #[derive(Debug)]
     pub enum BindingChange {
         Run
     }

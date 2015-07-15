@@ -83,6 +83,7 @@ impl I3Funcs for UnixStream {
     }
 }
 
+#[derive(Debug)]
 pub struct EventIterator<'a> {
     stream: &'a mut UnixStream,
 }
@@ -117,6 +118,7 @@ impl<'a> Iterator for EventIterator<'a> {
 }
 
 /// A subscription for `I3EventListener`
+#[derive(Debug)]
 pub enum Subscription {
     Workspace,
     Output,
@@ -127,6 +129,7 @@ pub enum Subscription {
 }
 
 /// Abstraction over an ipc socket to i3. Handles events.
+#[derive(Debug)]
 pub struct I3EventListener {
     stream: UnixStream
 }
@@ -174,6 +177,7 @@ impl I3EventListener {
 }
 
 /// Abstraction over an ipc socket to i3. Handles messages/replies.
+#[derive(Debug)]
 pub struct I3Connection {
     stream: UnixStream
 }
