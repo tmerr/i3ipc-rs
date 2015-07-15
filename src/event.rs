@@ -1,8 +1,9 @@
 //! Abstractions for the events passed back from i3.
 
 use reply;
-use serde;
+use serde::json;
 use std::str::FromStr;
+use common;
 
 use event::inner::*;
 
@@ -29,12 +30,31 @@ pub struct WorkspaceEventInfo {
 }
 
 impl FromStr for WorkspaceEventInfo {
-    type Err = serde::json::error::Error;
+    type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        panic!("not implemented");
+        let val: json::Value = try!(json::from_str(s));
+        Ok(WorkspaceEventInfo {
+            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+                "focus" => WorkspaceChange::Focus,
+                "init" => WorkspaceChange::Init,
+                "empty" => WorkspaceChange::Empty,
+                "urgent" => WorkspaceChange::Urgent,
+                _ => unreachable!()
+            },
+            current: match val.find("current").unwrap().clone() {
+                json::Value::Null => None,
+                val => Some(common::build_tree(&val))
+            },
+            old: match val.find("old") {
+                Some(o) => match o.clone() {
+                    json::Value::Null => None,
+                    val => Some(common::build_tree(&val))
+                },
+                None => None
+            }
+        })
     }
 }
-
 
 /// Data for `OutputEvent`.
 pub struct OutputEventInfo {
@@ -43,7 +63,7 @@ pub struct OutputEventInfo {
 }
 
 impl FromStr for OutputEventInfo {
-    type Err = serde::json::error::Error;
+    type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         panic!("not implemented");
     }
@@ -57,7 +77,7 @@ pub struct ModeEventInfo {
 }
 
 impl FromStr for ModeEventInfo {
-    type Err = serde::json::error::Error;
+    type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         panic!("not implemented");
     }
@@ -71,7 +91,7 @@ pub struct WindowEventInfo {
 }
 
 impl FromStr for WindowEventInfo {
-    type Err = serde::json::error::Error;
+    type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         panic!("not implemented");
     }
@@ -84,7 +104,7 @@ pub struct BarConfigEventInfo {
 }
 
 impl FromStr for BarConfigEventInfo {
-    type Err = serde::json::error::Error;
+    type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         panic!("not implemented");
     }
@@ -101,7 +121,7 @@ pub struct BindingEventInfo {
 }
 
 impl FromStr for BindingEventInfo {
-    type Err = serde::json::error::Error;
+    type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         panic!("not implemented");
     }
