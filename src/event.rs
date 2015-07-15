@@ -65,7 +65,13 @@ pub struct OutputEventInfo {
 impl FromStr for OutputEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        panic!("not implemented");
+        let val: json::Value = try!(json::from_str(s));
+        Ok(OutputEventInfo {
+            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+                "unspecified" => OutputChange::Unspecified,
+                _ => unreachable!()
+            }
+        })
     }
 }
 
@@ -79,7 +85,10 @@ pub struct ModeEventInfo {
 impl FromStr for ModeEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        panic!("not implemented");
+        let val: json::Value = try!(json::from_str(s));
+        Ok(ModeEventInfo {
+            change: val.find("change").unwrap().as_string().unwrap().to_owned()
+        })
     }
 }
 
