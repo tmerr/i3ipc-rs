@@ -21,6 +21,7 @@ after_success:
 - travis-cargo --only stable doc-upload
 env:
   global:
-  - TRAVIS_CARGO_NIGHTLY_FEATURE=nightly
+  # don't have special dependencies for nightly build
+  - TRAVIS_CARGO_NIGHTLY_FEATURE=" "
   # encrypted github token for doc upload
   - secure: P5keVRT+fLBT184XzNPmE5yfNUyI39vnzFTicqapFiwF7yeuoQmlk+aSCnc7yHgSGMAdYSNiGQFSmr8CRQ8SUP9ZBwmncS/Of/EcY0BJTCma10kEKuhCm1bW1BJyjTcR6LRrrykp3N+BRt8010hpA32D/yPwRg3KmakK4xt4aUkCtinxEswwW+bl8Ny2mDrkY5Fcy8j1AvStGfhYM2vqGcSPukc5miZXj/9cq/W56wCE8OQbUjPQcmzHyPQnZVfiLveTCqJK77zt7oqWTe+iEbdXmwJmSAqQBJpyoTCYyqfDpaKOPWLqe5fcY1JmeTvfDzA/KY1ESCV3LFpsdh/zNO8j/xfbslCljnxK9yyNW71LONhIp9rJnx3II+gA3K3lf4CgxVMFfZ7bFl6B9XvfbVTJ7YxSnhET+yEcLHedC3PXaMJ0aF2Nq5dwi9VYx1GR2rzquz8JxVUyPEJdUHSJuG5QACXAt5DO3NBOFmO1/EzvZYbZoY7Ci05pRqwrwL8IJhvp6KKyjMRZ4ux+MIFgdhqumdhVqW9Lg6dk8lnbcCKBHydxQpvkc9+QHH8buS/6GSfNS8iir2OKdrVN+GZvGpYL9fgrZnvCo4+o9aCBtepuWdHYgsx2OYu3BdH5UFLeqpOJQOWSRuHzPeDFm2S+MJSAwGB7uVSI5UoJwnsXVGI=
