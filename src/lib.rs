@@ -56,14 +56,12 @@ impl fmt::Display for I3ConnectError {
 /// An error sending or receiving a message.
 #[derive(Debug)]
 pub enum MessageError {
-    /// Network error while sending the message.
+    /// Network error sending the message.
     Send(io::Error),
-    /// Network error while receiving the response.
+    /// Network error receiving the response.
     Receive(io::Error),
     /// Got the response but couldn't parse the JSON.
     JsonCouldntParse(json::Error),
-    /// Parsed the JSON but it had unexpected contents.
-    JsonUnexpectedContents(String)
 }
 
 impl Error for MessageError {
@@ -72,7 +70,6 @@ impl Error for MessageError {
             MessageError::Send(_) => "Network error while sending message to i3",
             MessageError::Receive(_) => "Network error while receiving message from i3",
             MessageError::JsonCouldntParse(_) => "Got a response from i3 but couldn't parse the JSON",
-            MessageError::JsonUnexpectedContents(_) => "Parsed the JSON but it had unexpected contents"
         }
     }
     fn cause(&self) -> Option<&Error> {
@@ -80,7 +77,6 @@ impl Error for MessageError {
             MessageError::Send(ref e) => Some(e),
             MessageError::Receive(ref e) => Some(e),
             MessageError::JsonCouldntParse(ref e) => Some(e),
-            MessageError::JsonUnexpectedContents(_) => None
         }
     }
 }
@@ -143,6 +139,10 @@ impl I3Funcs for UnixStream {
     }
 }
 
+/// Iterates over events from i3.
+///
+/// `next` can always be called but if there's some problem with the underlying socket
+/// or received JSON it will be a `MessageError`.
 #[derive(Debug)]
 pub struct EventIterator<'a> {
     stream: &'a mut UnixStream,
