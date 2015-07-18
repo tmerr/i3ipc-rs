@@ -1,8 +1,11 @@
 # i3ipc-rs
+
 [![Build Status](https://travis-ci.org/tmerr/i3ipc-rs.svg?branch=master)](https://travis-ci.org/tmerr/i3ipc-rs)
 [![](http://meritbadge.herokuapp.com/i3ipc)](https://crates.io/crates/i3ipc)
 
 A Rust library for controlling i3-wm through its [IPC interface](https://i3wm.org/docs/ipc.html).
+
+[Documentation](http://tmerr.github.io/i3ipc-rs/i3ipc/index.html)
 
 ##Usage
 Add this to your Cargo.toml
