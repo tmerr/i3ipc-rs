@@ -4,16 +4,15 @@ extern crate unix_socket;
 extern crate byteorder;
 extern crate serde;
 
-use std::process;
-use unix_socket::UnixStream;
-use std::error::Error;
-use std::io;
-use std::fmt;
+use std::{io, fmt, process};
 use std::io::prelude::*;
-use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
-use serde::json;
+use std::error::Error;
 use std::str::FromStr;
+
+use unix_socket::UnixStream;
+use serde::json;
 use event::Event;
+use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 
 mod readhelp;
 mod common;
