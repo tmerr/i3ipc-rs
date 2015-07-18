@@ -60,4 +60,4 @@ fn main() {
 ```
 
 ## Status
-The library is complete as far as functionality goes. However the error handling and the API layout are still in the works.
+The library is complete as far as functionality goes. There's always room for improvement (or breakage), so open an issue or pull request if you have any ideas!
