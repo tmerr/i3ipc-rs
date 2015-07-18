@@ -1,6 +1,5 @@
 extern crate i3ipc;
 
-use std::env;
 use std::io;
 use std::io::Write;
 use i3ipc::I3Connection;
@@ -12,7 +11,7 @@ fn main() {
     let mut stdout = io::stdout();
     loop {
         print!(">>> ");
-        stdout.flush();
+        stdout.flush().unwrap();
         let mut command_text = String::new();
         stdin.read_line(&mut command_text).unwrap();
         command_text.pop(); // throw away the \n
