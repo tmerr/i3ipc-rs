@@ -39,29 +39,29 @@ pub mod event;
 /// It first involves first getting the i3 socket path, then connecting to the socket. Either part
 /// could go wrong which is why there are two possibilities here.
 #[derive(Debug)]
-pub enum I3ConnectError {
+pub enum EstablishError {
     /// An error while getting the socket path
     GetSocketPathError(io::Error),
     /// An error while accessing the socket
     SocketError(io::Error)
 }
 
-impl Error for I3ConnectError {
+impl Error for EstablishError {
     fn description(&self) -> &str {
         match *self {
-            I3ConnectError::GetSocketPathError(_) => "Couldn't determine i3's socket path",
-            I3ConnectError::SocketError(_) => "Found i3's socket path but failed to connect"
+            EstablishError::GetSocketPathError(_) => "Couldn't determine i3's socket path",
+            EstablishError::SocketError(_) => "Found i3's socket path but failed to connect"
         }
     }
     fn cause(&self) -> Option<&Error> {
         match *self {
-            I3ConnectError::GetSocketPathError(ref e) => Some(e),
-            I3ConnectError::SocketError(ref e) => Some(e)
+            EstablishError::GetSocketPathError(ref e) => Some(e),
+            EstablishError::SocketError(ref e) => Some(e)
         }
     }
 }
 
-impl fmt::Display for I3ConnectError {
+impl fmt::Display for EstablishError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.description())
     }
@@ -214,15 +214,15 @@ pub struct I3EventListener {
 
 impl I3EventListener {
     /// Establishes the IPC connection.
-    pub fn connect() -> Result<I3EventListener, I3ConnectError> {
+    pub fn connect() -> Result<I3EventListener, EstablishError> {
         return match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
                     Ok(stream) => Ok(I3EventListener { stream: stream }),
-                    Err(error) => Err(I3ConnectError::SocketError(error))
+                    Err(error) => Err(EstablishError::SocketError(error))
                 }
             }
-            Err(error) => Err(I3ConnectError::GetSocketPathError(error))
+            Err(error) => Err(EstablishError::GetSocketPathError(error))
         }
     }
 
@@ -270,15 +270,15 @@ pub struct I3Connection {
 
 impl I3Connection {
     /// Establishes the IPC connection.
-    pub fn connect() -> Result<I3Connection, I3ConnectError> {
+    pub fn connect() -> Result<I3Connection, EstablishError> {
         return match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
                     Ok(stream) => Ok(I3Connection { stream: stream }),
-                    Err(error) => Err(I3ConnectError::SocketError(error))
+                    Err(error) => Err(EstablishError::SocketError(error))
                 }
             }
-            Err(error) => Err(I3ConnectError::GetSocketPathError(error))
+            Err(error) => Err(EstablishError::GetSocketPathError(error))
         }
     }
 
