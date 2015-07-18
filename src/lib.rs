@@ -1,4 +1,19 @@
 //! A library for controlling i3-wm through its ipc interface.
+//!
+//! Using `I3Connection` you
+//! could send a command or get the hierarchy of containers. With
+//! `I3EventListener` you could listen for when the focused window changes. One of the goals is
+//! is to make this process as fool-proof as possible: usage should follow from the type
+//! signatures. 
+//!
+//! The types in the `event` and `reply` modules are near direct translations from the JSON
+//! used to talk to i3. The relevant
+//! documentation (meaning of each json object and field) is shamelessly stolen from the
+//! [site](https://i3wm.org/docs/ipc.html)
+//! and put into those modules.
+//!
+//! This library should cover all of i3's documented ipc features. If it's missing something
+//! please open an issue on github.
 
 extern crate unix_socket;
 extern crate byteorder;
@@ -140,8 +155,8 @@ impl I3Funcs for UnixStream {
 
 /// Iterates over events from i3.
 ///
-/// `next` can always be called but if there's some problem with the underlying socket
-/// or received JSON it will be a `MessageError`.
+/// Each element may be `Err` or `Ok` (Err for an issue with the socket connection or data sent
+/// from i3).
 #[derive(Debug)]
 pub struct EventIterator<'a> {
     stream: &'a mut UnixStream,
@@ -241,7 +256,7 @@ impl I3EventListener {
         Ok(reply::Subscribe { success: is_success })
     }
 
-    /// Iterates over subscribed events forever.
+    /// Iterate over subscribed events forever.
     pub fn listen(&mut self) -> EventIterator {
         EventIterator { stream: &mut self.stream }
     }
