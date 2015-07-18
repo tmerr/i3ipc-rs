@@ -6,7 +6,9 @@ extern crate serde;
 
 use std::process;
 use unix_socket::UnixStream;
+use std::error::Error;
 use std::io;
+use std::fmt;
 use std::io::prelude::*;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 use serde::json;
@@ -18,17 +20,75 @@ mod common;
 pub mod reply;
 pub mod event;
 
-/// An error while instantiating an `I3Connection`.
+/// An error instantiating an I3Conection or I3EventListener.
 ///
-/// Creating an I3Connection involves first getting
-/// the i3 socket path, then connecting to the socket. Either part could go wrong, which is why
-/// there are two possibilities here.
+/// It first involves first getting the i3 socket path, then connecting to the socket. Either part
+/// could go wrong which is why there are two possibilities here.
 #[derive(Debug)]
 pub enum I3ConnectError {
     /// An error while getting the socket path
     GetSocketPathError(io::Error),
     /// An error while accessing the socket
     SocketError(io::Error)
+}
+
+impl Error for I3ConnectError {
+    fn description(&self) -> &str {
+        match *self {
+            I3ConnectError::GetSocketPathError(_) => "Couldn't determine i3's socket path",
+            I3ConnectError::SocketError(_) => "Found i3's socket path but failed to connect"
+        }
+    }
+    fn cause(&self) -> Option<&Error> {
+        match *self {
+            I3ConnectError::GetSocketPathError(ref e) => Some(e),
+            I3ConnectError::SocketError(ref e) => Some(e)
+        }
+    }
+}
+
+impl fmt::Display for I3ConnectError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.description())
+    }
+}
+
+/// An error sending or receiving a message from i3.
+#[derive(Debug)]
+pub enum MessageError {
+    /// Network error while sending the message.
+    Send(io::Error),
+    /// Network error while receiving the response.
+    Receive(io::Error),
+    /// Got the response but couldn't parse the json.
+    JsonCouldntParse(json::Error),
+    /// Parsed the JSON but it had unexpected contents.
+    JsonUnexpectedContents(String)
+}
+
+impl Error for MessageError {
+    fn description(&self) -> &str {
+        match *self {
+            MessageError::Send(_) => "Network error while sending message to i3",
+            MessageError::Receive(_) => "Network error while receiving message from i3",
+            MessageError::JsonCouldntParse(_) => "Got a response from i3 but couldn't parse the JSON",
+            MessageError::JsonUnexpectedContents(_) => "Parsed the JSON but it had unexpected contents"
+        }
+    }
+    fn cause(&self) -> Option<&Error> {
+        match *self {
+            MessageError::Send(ref e) => Some(e),
+            MessageError::Receive(ref e) => Some(e),
+            MessageError::JsonCouldntParse(ref e) => Some(e),
+            MessageError::JsonUnexpectedContents(_) => None
+        }
+    }
+}
+
+impl fmt::Display for MessageError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.description())
+    }
 }
 
 fn get_socket_path() -> io::Result<String> {
