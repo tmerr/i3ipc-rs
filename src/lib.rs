@@ -213,7 +213,7 @@ impl I3EventListener {
     }
 
     /// Subscribes your connection to certain events.
-    pub fn subscribe(&mut self, events: &[Subscription]) -> io::Result<reply::Subscribe> {
+    pub fn subscribe(&mut self, events: &[Subscription]) -> Result<reply::Subscribe, MessageError> {
         let json =
             "[ ".to_owned()
             + &events.iter()
@@ -227,9 +227,17 @@ impl I3EventListener {
                     .collect::<Vec<_>>()
                     .connect(", ")[..]
             + " ]";
-        try!(self.stream.send_i3_message(2, &json));
-        let (_, payload) = try!(self.stream.receive_i3_message());
-        let j: json::Value = json::from_str(&payload).unwrap();
+        if let Err(e) = self.stream.send_i3_message(2, &json) {
+            return Err(MessageError::Send(e));
+        }
+        let payload = match self.stream.receive_i3_message() {
+            Ok((_, payload)) => payload,
+            Err(e) => { return Err(MessageError::Receive(e)); }
+        };
+        let j: json::Value = match json::from_str(&payload) {
+            Ok(j) => j,
+            Err(e) => { return Err(MessageError::JsonCouldntParse(e)) }
+        };
         let is_success = j.find("success").unwrap().as_boolean().unwrap();
         Ok(reply::Subscribe { success: is_success })
     }
