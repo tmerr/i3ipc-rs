@@ -20,7 +20,7 @@ mod common;
 pub mod reply;
 pub mod event;
 
-/// An error instantiating an I3Conection or I3EventListener.
+/// An error initializing a connection.
 ///
 /// It first involves first getting the i3 socket path, then connecting to the socket. Either part
 /// could go wrong which is why there are two possibilities here.
@@ -53,14 +53,14 @@ impl fmt::Display for I3ConnectError {
     }
 }
 
-/// An error sending or receiving a message from i3.
+/// An error sending or receiving a message.
 #[derive(Debug)]
 pub enum MessageError {
     /// Network error while sending the message.
     Send(io::Error),
     /// Network error while receiving the response.
     Receive(io::Error),
-    /// Got the response but couldn't parse the json.
+    /// Got the response but couldn't parse the JSON.
     JsonCouldntParse(json::Error),
     /// Parsed the JSON but it had unexpected contents.
     JsonUnexpectedContents(String)
@@ -149,31 +149,35 @@ pub struct EventIterator<'a> {
 }
 
 impl<'a> Iterator for EventIterator<'a> {
-    type Item = io::Result<event::Event>;
+    type Item = Result<event::Event, MessageError>;
 
     fn next(&mut self) -> Option<Self::Item>{
         /// the msgtype passed in should have its highest order bit stripped
         /// makes the i3 event
-        fn build_event(msgtype: u32, payload: &str) -> event::Event {
-            match msgtype {
-                0 => event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload).unwrap()),
-                1 => event::Event::OutputEvent(event::OutputEventInfo::from_str(payload).unwrap()),
-                2 => event::Event::ModeEvent(event::ModeEventInfo::from_str(payload).unwrap()),
-                3 => event::Event::WindowEvent(event::WindowEventInfo::from_str(payload).unwrap()),
-                4 => event::Event::BarConfigEvent(event::BarConfigEventInfo::from_str(payload).unwrap()),
-                5 => event::Event::BindingEvent(event::BindingEventInfo::from_str(payload).unwrap()),
+        fn build_event(msgtype: u32, payload: &str) -> Result<event::Event, json::Error> {
+            Ok(match msgtype {
+                0 => event::Event::WorkspaceEvent(try!(event::WorkspaceEventInfo::from_str(payload))),
+                1 => event::Event::OutputEvent(try!(event::OutputEventInfo::from_str(payload))),
+                2 => event::Event::ModeEvent(try!(event::ModeEventInfo::from_str(payload))),
+                3 => event::Event::WindowEvent(try!(event::WindowEventInfo::from_str(payload))),
+                4 => event::Event::BarConfigEvent(try!(event::BarConfigEventInfo::from_str(payload))),
+                5 => event::Event::BindingEvent(try!(event::BindingEventInfo::from_str(payload))),
                 _ => unreachable!()
-            }
+            })
         }
 
-        let result = self.stream.receive_i3_message();
-        if result.is_err() {
-            return Some(Err(result.err().unwrap()));
+        match self.stream.receive_i3_message() {
+            Ok((msgint, payload)) => {
+                // strip the highest order bit indicating it's an event.
+                let msgtype = (msgint << 1) >> 1;
+                
+                Some(match build_event(msgtype, &payload) {
+                    Ok(event) => Ok(event),
+                    Err(e) => Err(MessageError::JsonCouldntParse(e)),
+                })
+            }
+            Err(e) => Some(Err(MessageError::Receive(e))),
         }
-        let (msgint, payload) = result.unwrap();
-        // throw out the highest order bit of the message type. it just says it's an event.
-        let msgtype = (msgint << 1) >> 1;
-        Some(Ok(build_event(msgtype, &payload)))
     }
 }
 
