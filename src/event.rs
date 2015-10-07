@@ -1,7 +1,7 @@
 //! Abstractions for the events passed back from i3.
 
 use reply;
-use serde::json;
+use serde_json as json;
 use std::str::FromStr;
 use common;
 

@@ -1,6 +1,6 @@
 //! Some common code used by both the event and reply modules.
 use std::collections::HashMap;
-use serde::json;
+use serde_json as json;
 use reply;
 
 /// Recursively build the tree of containers from the given json value.

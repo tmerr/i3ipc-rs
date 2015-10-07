@@ -18,6 +18,7 @@
 extern crate unix_socket;
 extern crate byteorder;
 extern crate serde;
+extern crate serde_json;
 
 use std::{io, fmt, process};
 use std::io::prelude::*;
@@ -25,7 +26,7 @@ use std::error::Error;
 use std::str::FromStr;
 
 use unix_socket::UnixStream;
-use serde::json;
+use serde_json as json;
 use event::Event;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 
