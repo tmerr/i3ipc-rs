@@ -240,7 +240,7 @@ impl I3EventListener {
                         Subscription::BarConfig => "\"barconfig_update\"",
                         Subscription::Binding => "\"binding\""})
                     .collect::<Vec<_>>()
-                    .connect(", ")[..]
+                    .join(", ")[..]
             + " ]";
         if let Err(e) = self.stream.send_i3_message(2, &json) {
             return Err(MessageError::Send(e));
