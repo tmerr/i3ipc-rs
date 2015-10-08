@@ -326,5 +326,6 @@ pub struct Version {
     /// too). 
     pub human_readable: String,
 
+    /// The current config path.
     pub loaded_config_file_name: String
 }
