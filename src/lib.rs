@@ -452,6 +452,7 @@ impl I3Connection {
             Ok((_, payload)) => payload,
             Err(e) => { return Err(MessageError::Receive(e)); }
         };
+        println!("{}", payload);
         let j = match json::from_str::<json::Value>(&payload) {
             Ok(v) => v,
             Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
@@ -460,7 +461,9 @@ impl I3Connection {
             major: j.find("major").unwrap().as_i64().unwrap() as i32,
             minor: j.find("minor").unwrap().as_i64().unwrap() as i32,
             patch: j.find("patch").unwrap().as_i64().unwrap() as i32,
-            human_readable: j.find("human_readable").unwrap().as_string().unwrap().to_owned()
+            human_readable: j.find("human_readable").unwrap().as_string().unwrap().to_owned(),
+            loaded_config_file_name: j.find("loaded_config_file_name").unwrap().as_string()
+                                                                      .unwrap().to_owned()
         })
     }
 }
@@ -652,7 +655,7 @@ mod test {
             "change": "run",
             "binding": {
                 "command": "nop",
-                "mods": [
+                "event_state_mask": [
                     "shift",
                     "ctrl"
                 ],

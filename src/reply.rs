@@ -214,6 +214,9 @@ pub enum ColorableBarPart {
     /// Background color for a workspace button when the workspace has focus.
     FocusedWorkspaceBg,
 
+    /// Border color for a workspace button when the workspace has focus.
+    FocusedWorkspaceBorder,
+
     /// Text color for a workspace button when the workspace is active (visible) on some
     /// output, but the focus is on another one. You can only tell this apart from the
     /// focused workspace when you are using multiple monitors. 
@@ -224,6 +227,11 @@ pub enum ColorableBarPart {
     /// focused workspace when you are using multiple monitors. 
     ActiveWorkspaceBg,
 
+    /// Border color for a workspace button when the workspace is active (visible) on some
+    /// output, but the focus is on another one. You can only tell this apart from the
+    /// focused workspace when you are using multiple monitors. 
+    ActiveWorkspaceBorder,
+
     /// Text color for a workspace button when the workspace does not have focus and is not
     /// active (visible) on any output. This will be the case for most workspaces.
     InactiveWorkspaceText,
@@ -232,12 +240,28 @@ pub enum ColorableBarPart {
     /// not active (visible) on any output. This will be the case for most workspaces.
     InactiveWorkspaceBg,
 
+    /// Border color for a workspace button when the workspace does not have focus and is
+    /// not active (visible) on any output. This will be the case for most workspaces.
+    InactiveWorkspaceBorder,
+
     /// Text color for workspaces which contain at least one window with the urgency hint set.
     UrgentWorkspaceText,
 
     /// Background color for workspaces which contain at least one window with the urgency hint
     /// set.
-    UrgentWorkspaceBar, // TODO: Did the docs typo?
+    UrgentWorkspaceBg,
+
+    /// Border color for workspaces which contain at least one window with the urgency hint set.
+    UrgentWorkspaceBorder,
+
+    /// Text color for the binding mode indicator.
+    BindingModeText,
+
+    /// Background color for the binding mode indicator.
+    BindingModeBg,
+
+    /// Border color for the binding mode indicator.
+    BindingModeBorder,
 
     /// A colorable bar part that was not documented. (The String is its name).
     Undocumented(String)
@@ -300,5 +324,7 @@ pub struct Version {
     /// branch name. When you need to display the i3 version to your users, use the
     /// human-readable version whenever possible (since this is what i3 --version displays,
     /// too). 
-    pub human_readable: String
+    pub human_readable: String,
+
+    pub loaded_config_file_name: String
 }

@@ -95,11 +95,19 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
                     "separator" => reply::ColorableBarPart::Separator,
                     "focused_workspace_text" => reply::ColorableBarPart::FocusedWorkspaceText,
                     "focused_workspace_bg" => reply::ColorableBarPart::FocusedWorkspaceBg,
+                    "focused_workspace_border" => reply::ColorableBarPart::FocusedWorkspaceBorder,
+                    "active_workspace_text" => reply::ColorableBarPart::ActiveWorkspaceText,
                     "active_workspace_bg" => reply::ColorableBarPart::ActiveWorkspaceBg,
+                    "active_workspace_border" => reply::ColorableBarPart::ActiveWorkspaceBorder,
                     "inactive_workspace_text" => reply::ColorableBarPart::InactiveWorkspaceText,
                     "inactive_workspace_bg" => reply::ColorableBarPart::InactiveWorkspaceBg,
+                    "inactive_workspace_border" => reply::ColorableBarPart::InactiveWorkspaceBorder,
                     "urgent_workspace_text" => reply::ColorableBarPart::UrgentWorkspaceText,
-                    "urgent_workspace_bar" => reply::ColorableBarPart::UrgentWorkspaceBar,
+                    "urgent_workspace_bg" => reply::ColorableBarPart::UrgentWorkspaceBg,
+                    "urgent_workspace_border" => reply::ColorableBarPart::UrgentWorkspaceBorder,
+                    "binding_mode_text" => reply::ColorableBarPart::BindingModeText,
+                    "binding_mode_bg" => reply::ColorableBarPart::BindingModeBg,
+                    "binding_mode_border" => reply::ColorableBarPart::BindingModeBorder,
                     other => reply::ColorableBarPart::Undocumented(other.to_owned())
                 };
                 let hex = colors.get(c).unwrap().as_string().unwrap().to_owned();

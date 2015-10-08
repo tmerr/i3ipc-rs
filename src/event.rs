@@ -168,7 +168,7 @@ impl FromStr for BindingEventInfo {
             },
             binding: Binding {
                 command: bind.find("command").unwrap().as_string().unwrap().to_owned(),
-                mods: bind.find("mods").unwrap()
+                event_state_mask: bind.find("event_state_mask").unwrap()
                          .as_array().unwrap().iter()
                          .map(|m| m.as_string().unwrap().to_owned())
                          .collect(),
@@ -239,8 +239,8 @@ pub mod inner {
         /// The i3 command that is configured to run for this binding.
         pub command: String,
 
-        /// The modifier keys that were configured with this binding.
-        pub mods: Vec<String>,
+        /// The group and modifier keys that were configured with this binding.
+        pub event_state_mask: Vec<String>,
 
         /// If the binding was configured with blindcode, this will be the key code that was given for
         /// the binding. If the binding is a mouse binding, it will be the number of times the mouse
