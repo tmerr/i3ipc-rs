@@ -60,5 +60,4 @@ fn main() {
 ```
 
 ## Status
-This library was last updated for **i3 version 4.11**. It is generally forward compatible, but not backward compatible.   
-Contributions are welcome!
+This library was last updated for **i3 version 4.11**. It is generally forward compatible, but not backward compatible. Contributions are welcome!
