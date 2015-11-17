@@ -60,4 +60,5 @@ fn main() {
 ```
 
 ## Status
-This library was last updated for **i3 version 4.11** . There's always room for improvement (or breakage), so open an issue or pull request if you have any ideas!
+This library was last updated for **i3 version 4.11**. It is generally forward compatible, but not backward compatible.   
+Contributions are welcome!
