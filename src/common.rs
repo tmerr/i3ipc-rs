@@ -34,7 +34,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         border: match val.find("border").unwrap().as_string().unwrap().as_ref() {
             "normal" => reply::NodeBorder::Normal,
             "none" => reply::NodeBorder::None,
-            "1pixel" => reply::NodeBorder::OnePixel,
+            "pixel" => reply::NodeBorder::Pixel,
             _ => unreachable!()
         },
         current_border_width: val.find("current_border_width").unwrap().as_i64().unwrap() as i32,

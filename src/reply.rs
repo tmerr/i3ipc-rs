@@ -92,7 +92,7 @@ pub enum NodeType {
 pub enum NodeBorder {
     Normal,
     None,
-    OnePixel
+    Pixel
 }
 
 #[derive(Debug)]
