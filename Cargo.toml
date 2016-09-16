@@ -1,6 +1,6 @@
 [package]
 name = "i3ipc"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Trevor Merrifield <trevorm42@gmail.com>"]
 description = "A library for controlling i3-wm through its IPC interface"
 license = "MIT"
