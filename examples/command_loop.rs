@@ -7,7 +7,7 @@ use i3ipc::I3Connection;
 fn main() {
     println!("Executes i3 commands in a loop. Enter \"q\" at any time to quit.");
     let mut connection = I3Connection::connect().ok().expect("failed to connect");
-    let mut stdin = io::stdin();
+    let stdin = io::stdin();
     let mut stdout = io::stdout();
     loop {
         print!(">>> ");

@@ -27,10 +27,8 @@ use std::str::FromStr;
 
 use unix_socket::UnixStream;
 use serde_json as json;
-use event::Event;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 
-mod readhelp;
 mod common;
 pub mod reply;
 pub mod event;
@@ -139,7 +137,8 @@ impl I3Funcs for UnixStream {
 
     /// returns a tuple of (message type, payload)
     fn receive_i3_message(&mut self) -> io::Result<(u32, String)> {
-        let magic_data = try!(readhelp::read_exact(self, 6));
+        let mut magic_data = [0_u8; 6];
+        try!(self.read_exact(&mut magic_data));
         let magic_string = String::from_utf8_lossy(&magic_data);
         if magic_string != "i3-ipc" {
             let error_text = format!("unexpected magic string: expected 'i3-ipc' but got {}",
@@ -148,7 +147,8 @@ impl I3Funcs for UnixStream {
         }
         let payload_len = try!(self.read_u32::<LittleEndian>());
         let message_type = try!(self.read_u32::<LittleEndian>());
-        let payload_data = try!(readhelp::read_exact(self, payload_len as usize));
+        let mut payload_data = vec![0_u8 ; payload_len as usize];
+        try!(self.read_exact(&mut payload_data[..]));
         let payload_string = String::from_utf8_lossy(&payload_data).into_owned();
         Ok((message_type, payload_string))
     }
