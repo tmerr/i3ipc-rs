@@ -452,7 +452,6 @@ impl I3Connection {
             Ok((_, payload)) => payload,
             Err(e) => { return Err(MessageError::Receive(e)); }
         };
-        println!("{}", payload);
         let j = match json::from_str::<json::Value>(&payload) {
             Ok(v) => v,
             Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
