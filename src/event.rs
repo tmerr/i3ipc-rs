@@ -121,6 +121,7 @@ impl FromStr for WindowEventInfo {
                 "move" => WindowChange::Move,
                 "floating" => WindowChange::Floating,
                 "urgent" => WindowChange::Urgent,
+                "mark" => WindowChange::Mark,
                 _ => unreachable!()
             },
             container: common::build_tree(val.find("container").unwrap())
@@ -223,7 +224,9 @@ pub mod inner {
         /// The window has transitioned to or from floating.
         Floating,
         /// The window has become urgent or lost its urgent status.
-        Urgent
+        Urgent,
+        /// The window's marks have been modified
+        Mark
     }
 
     /// Either keyboard or mouse.
