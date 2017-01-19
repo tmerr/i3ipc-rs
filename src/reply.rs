@@ -63,6 +63,8 @@ pub struct Output {
     pub name: String,
     /// Whether the output is currently active (has a valid mode).
     pub active: bool,
+    /// Whether the output is currently the primary output.
+    pub primary: bool,
     /// The name of the current workspace that is visible on this output. None if the output is
     /// not active.
     pub current_workspace: Option<String>,
