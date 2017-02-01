@@ -41,6 +41,10 @@ impl FromStr for WorkspaceEventInfo {
                 "init" => WorkspaceChange::Init,
                 "empty" => WorkspaceChange::Empty,
                 "urgent" => WorkspaceChange::Urgent,
+                "rename" => WorkspaceChange::Rename,
+                "reload" => WorkspaceChange::Reload,
+                "move" => WorkspaceChange::Move,
+                "restored" => WorkspaceChange::Restored,
                 _ => unreachable!()
             },
             current: match val.find("current").unwrap().clone() {
@@ -196,7 +200,11 @@ pub mod inner {
         Focus,
         Init,
         Empty,
-        Urgent
+        Urgent,
+        Rename,
+        Reload,
+        Restored,
+        Move,
     }
 
     /// The kind of output change.
