@@ -367,6 +367,7 @@ impl I3Connection {
                            reply::Output {
                                name: o.find("name").unwrap().as_string().unwrap().to_owned(),
                                active: o.find("active").unwrap().as_boolean().unwrap(),
+                               primary: o.find("primary").unwrap().as_boolean().unwrap(),
                                current_workspace: match o.find("current_workspace").unwrap().clone() {
                                    json::Value::String(c_w) => Some(c_w),
                                    json::Value::Null => None,
