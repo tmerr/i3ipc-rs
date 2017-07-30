@@ -7,16 +7,16 @@ A Rust library for controlling i3-wm through its [IPC interface](https://i3wm.or
 
 [Documentation](http://tmerr.github.io/i3ipc-rs/i3ipc/index.html)
 
-##Usage
+## Usage
 Add this to your Cargo.toml
 ```toml
 [dependencies]
 i3ipc = "0.4.2"
 ```
 
-##Messages:
+## Messages:
 
-````rust
+```rust
 extern crate i3ipc;
 use i3ipc::I3Connection;
 
@@ -60,4 +60,5 @@ fn main() {
 ```
 
 ## Status
-This library was last updated for **i3 version 4.11**. It is generally forward compatible, but not backward compatible. Contributions are welcome!
+
+This library was last updated for **i3 version 4.11**. There is an open ticket concerning forward compatibility: https://github.com/tmerr/i3ipc-rs/issues/8. Contributions are welcome!
