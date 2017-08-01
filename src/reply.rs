@@ -87,14 +87,18 @@ pub enum NodeType {
     Con,
     FloatingCon,
     Workspace,
-    DockArea
+    DockArea,
+    /// A NodeType we don't support yet.
+    Unknown,
 }
 
 #[derive(Debug)]
 pub enum NodeBorder {
     Normal,
     None,
-    Pixel
+    Pixel,
+    /// A NodeBorder we don't support yet.
+    Unknown,
 }
 
 #[derive(Debug)]
@@ -104,7 +108,9 @@ pub enum NodeLayout {
     Stacked,
     Tabbed,
     DockArea,
-    Output
+    Output,
+    /// A NodeLayout we don't support yet.
+    Unknown,
 }
 
 /// The reply to the `get_tree` request.
@@ -265,8 +271,8 @@ pub enum ColorableBarPart {
     /// Border color for the binding mode indicator.
     BindingModeBorder,
 
-    /// A colorable bar part that was not documented. (The String is its name).
-    Undocumented(String)
+    /// A ColorableBarPart we don't support yet.
+    Unknown,
 }
 
 /// The reply to the `get_bar_config` request.

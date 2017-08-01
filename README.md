@@ -59,6 +59,8 @@ fn main() {
 }
 ```
 
-## Status
+## Compatibility
 
-This library was last updated for **i3 version 4.11**. There is an open ticket concerning forward compatibility: https://github.com/tmerr/i3ipc-rs/issues/8. Contributions are welcome!
+This library was last updated for **i3 version 4.11**, but is forward compatible. Contributions are welcome!
+
+All documented functionality from i3 version 4.11 can be handled by this library. Additions to the i3 IPC interface that are not understood by this library will generally return an `Unknown` value and log a warning to the target `"i3ipc"` using the [log crate](http://doc.rust-lang.org/log). Binaries using this library should [install a logger](https://doc.rust-lang.org/log/log/index.html#in-executables) to view details of such additions.

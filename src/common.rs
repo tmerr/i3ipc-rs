@@ -29,13 +29,19 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             "floating_con" => reply::NodeType::FloatingCon,
             "workspace" => reply::NodeType::Workspace,
             "dockarea" => reply::NodeType::DockArea,
-            _ => unreachable!()
+            other => {
+                warn!(target: "i3ipc", "Unknown NodeType {}", other);
+                reply::NodeType::Unknown
+            }
         },
         border: match val.find("border").unwrap().as_string().unwrap().as_ref() {
             "normal" => reply::NodeBorder::Normal,
             "none" => reply::NodeBorder::None,
             "pixel" => reply::NodeBorder::Pixel,
-            _ => unreachable!()
+            other => {
+                warn!(target: "i3ipc", "Unknown NodeBorder {}", other);
+                reply::NodeBorder::Unknown
+            }
         },
         current_border_width: val.find("current_border_width").unwrap().as_i64().unwrap() as i32,
         layout: match val.find("layout").unwrap().as_string().unwrap().as_ref() {
@@ -45,7 +51,10 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             "tabbed" => reply::NodeLayout::Tabbed,
             "dockarea" => reply::NodeLayout::DockArea,
             "output" => reply::NodeLayout::Output,
-            _ => unreachable!()
+            other => {
+                warn!(target: "i3ipc", "Unknown NodeLayout {}", other);
+                reply::NodeLayout::Unknown
+            }
         },
         percent: match *val.find("percent").unwrap() {
             json::Value::F64(f) => Some(f),
@@ -108,7 +117,10 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
                     "binding_mode_text" => reply::ColorableBarPart::BindingModeText,
                     "binding_mode_bg" => reply::ColorableBarPart::BindingModeBg,
                     "binding_mode_border" => reply::ColorableBarPart::BindingModeBorder,
-                    other => reply::ColorableBarPart::Undocumented(other.to_owned())
+                    other => {
+                        warn!(target: "i3ipc", "Unknown ColorableBarPart {}", other);
+                        reply::ColorableBarPart::Unknown
+                    }
                 };
                 let hex = colors.get(c).unwrap().as_string().unwrap().to_owned();
                 map.insert(enum_key, hex);
