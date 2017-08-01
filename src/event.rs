@@ -41,6 +41,10 @@ impl FromStr for WorkspaceEventInfo {
                 "init" => WorkspaceChange::Init,
                 "empty" => WorkspaceChange::Empty,
                 "urgent" => WorkspaceChange::Urgent,
+                "rename" => WorkspaceChange::Rename,
+                "reload" => WorkspaceChange::Reload,
+                "move" => WorkspaceChange::Move,
+                "restored" => WorkspaceChange::Restored,
                 other => {
                     warn!(target: "i3ipc", "Unknown WorkspaceChange {}", other);
                     WorkspaceChange::Unknown
@@ -212,6 +216,10 @@ pub mod inner {
         Init,
         Empty,
         Urgent,
+        Rename,
+        Reload,
+        Restored,
+        Move,
         /// A WorkspaceChange we don't support yet.
         Unknown,
     }
