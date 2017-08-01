@@ -41,7 +41,10 @@ impl FromStr for WorkspaceEventInfo {
                 "init" => WorkspaceChange::Init,
                 "empty" => WorkspaceChange::Empty,
                 "urgent" => WorkspaceChange::Urgent,
-                _ => unreachable!()
+                other => {
+                    warn!(target: "i3ipc", "Unknown WorkspaceChange {}", other);
+                    WorkspaceChange::Unknown
+                }
             },
             current: match val.find("current").unwrap().clone() {
                 json::Value::Null => None,
@@ -72,7 +75,10 @@ impl FromStr for OutputEventInfo {
         Ok(OutputEventInfo {
             change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
                 "unspecified" => OutputChange::Unspecified,
-                _ => unreachable!()
+                other => {
+                    warn!(target: "i3ipc", "Unknown OutputChange {}", other);
+                    OutputChange::Unknown
+                }
             }
         })
     }
@@ -121,7 +127,10 @@ impl FromStr for WindowEventInfo {
                 "move" => WindowChange::Move,
                 "floating" => WindowChange::Floating,
                 "urgent" => WindowChange::Urgent,
-                _ => unreachable!()
+                other => {
+                    warn!(target: "i3ipc", "Unknown WindowChange {}", other);
+                    WindowChange::Unknown
+                }
             },
             container: common::build_tree(val.find("container").unwrap())
         })
@@ -164,7 +173,10 @@ impl FromStr for BindingEventInfo {
         Ok(BindingEventInfo {
             change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
                 "run" => BindingChange::Run,
-                _ => unreachable!()
+                other => {
+                    warn!(target: "i3ipc", "Unknown BindingChange {}", other);
+                    BindingChange::Unknown
+                }
             },
             binding: Binding {
                 command: bind.find("command").unwrap().as_string().unwrap().to_owned(),
@@ -181,7 +193,10 @@ impl FromStr for BindingEventInfo {
                 input_type: match bind.find("input_type").unwrap().as_string().unwrap().as_ref() {
                     "keyboard" => InputType::Keyboard,
                     "mouse" => InputType::Mouse,
-                    _ => unreachable!()
+                    other => {
+                        warn!(target: "i3ipc", "Unknown InputType {}", other);
+                        InputType::Unknown
+                    }
                 }
             }
         })
@@ -196,13 +211,17 @@ pub mod inner {
         Focus,
         Init,
         Empty,
-        Urgent
+        Urgent,
+        /// A WorkspaceChange we don't support yet.
+        Unknown,
     }
 
     /// The kind of output change.
     #[derive(Debug)]
     pub enum OutputChange {
-        Unspecified
+        Unspecified,
+        /// An OutputChange we don't support yet.
+        Unknown,
     }
 
     /// The kind of window change.
@@ -223,14 +242,18 @@ pub mod inner {
         /// The window has transitioned to or from floating.
         Floating,
         /// The window has become urgent or lost its urgent status.
-        Urgent
+        Urgent,
+        /// A WindowChange we don't support yet.
+        Unknown,
     }
 
     /// Either keyboard or mouse.
     #[derive(Debug)]
     pub enum InputType {
         Keyboard,
-        Mouse
+        Mouse,
+        /// An InputType we don't support yet.
+        Unknown,
     }
 
     /// Contains details about the binding that was run.
@@ -258,6 +281,8 @@ pub mod inner {
     /// The kind of binding change.
     #[derive(Debug)]
     pub enum BindingChange {
-        Run
+        Run,
+        /// A BindingChange we don't support yet.
+        Unknown,
     }
 }
