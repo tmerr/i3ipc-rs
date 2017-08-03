@@ -14,7 +14,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .collect::<Vec<_>>(),
             None => vec![]
         },
-        id: val.find("id").unwrap().as_i64().unwrap() as i32,
+        id: val.find("id").unwrap().as_i64().unwrap(),
         name: match val.find("name") {
             Some(n) => match n.as_string() {
                 Some(s) => Some(s.to_owned()),

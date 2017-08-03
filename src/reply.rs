@@ -122,7 +122,7 @@ pub struct Node {
     /// The internal ID (actually a C pointer value) of this container. Do not make any
     /// assumptions about it. You can use it to (re-)identify and address containers when
     /// talking to i3.
-    pub id: i32,
+    pub id: i64,
 
     /// The internal name of this container. For all containers which are part of the tree
     /// structure down to the workspace contents, this is set to a nice human-readable name of
