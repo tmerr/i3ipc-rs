@@ -11,7 +11,7 @@ A Rust library for controlling i3-wm through its [IPC interface](https://i3wm.or
 Add this to your Cargo.toml
 ```toml
 [dependencies]
-i3ipc = "0.5.0"
+i3ipc = "0.6.0"
 ```
 
 ## Messages:
