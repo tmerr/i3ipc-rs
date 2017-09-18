@@ -14,6 +14,14 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .collect::<Vec<_>>(),
             None => vec![]
         },
+        floating_nodes: match val.find("floating_nodes") {
+            Some(nds) => nds.as_array()
+                            .unwrap()
+                            .iter()
+                            .map(|n| build_tree(n))
+                            .collect::<Vec<_>>(),
+            None => vec![]
+        },
         id: val.find("id").unwrap().as_i64().unwrap(),
         name: match val.find("name") {
             Some(n) => match n.as_string() {
