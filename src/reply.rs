@@ -119,6 +119,9 @@ pub struct Node {
     /// The child nodes of this container.
     pub nodes: Vec<Node>,
 
+    /// The child floating nodes of this container.
+    pub floating_nodes: Vec<Node>,
+
     /// The internal ID (actually a C pointer value) of this container. Do not make any
     /// assumptions about it. You can use it to (re-)identify and address containers when
     /// talking to i3.
