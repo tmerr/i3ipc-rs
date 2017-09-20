@@ -178,7 +178,11 @@ impl<'a> Iterator for EventIterator<'a> {
                 3 => event::Event::WindowEvent(try!(event::WindowEventInfo::from_str(payload))),
                 4 => event::Event::BarConfigEvent(try!(event::BarConfigEventInfo::from_str(payload))),
                 5 => event::Event::BindingEvent(try!(event::BindingEventInfo::from_str(payload))),
-                _ => unreachable!()
+
+                #[cfg(feature = "i3-4-14")]
+                6 => event::Event::ShutdownEvent(try!(event::ShutdownEventInfo::from_str(payload))),
+
+                _ => unreachable!("received an event we aren't subscribed to!")
             })
         }
 
@@ -205,7 +209,9 @@ pub enum Subscription {
     Mode,
     Window,
     BarConfig,
-    Binding
+    Binding,
+    #[cfg(feature = "i3-4-14")]
+    Shutdown,
 }
 
 /// Abstraction over an ipc socket to i3. Handles events.
@@ -239,7 +245,9 @@ impl I3EventListener {
                         Subscription::Mode => "\"mode\"",
                         Subscription::Window => "\"window\"",
                         Subscription::BarConfig => "\"barconfig_update\"",
-                        Subscription::Binding => "\"binding\""})
+                        Subscription::Binding => "\"binding\"",
+                        #[cfg(feature = "i3-4-14")]
+                        Subscription::Shutdown => "\"shutdown\""})
                     .collect::<Vec<_>>()
                     .join(", ")[..]
             + " ]";
