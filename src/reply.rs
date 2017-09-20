@@ -219,6 +219,20 @@ pub enum ColorableBarPart {
     /// Text color to be used for the separator.
     Separator,
 
+    /// Background color of the bar on the currently focused monitor output.
+    #[cfg(feature = "i3-4-12")]
+    FocusedBackground,
+
+    /// Text color to be used for the statusline on the currently focused
+    /// monitor output.
+    #[cfg(feature = "i3-4-12")]
+    FocusedStatusline,
+
+    /// Text color to be used for the separator on the currently focused
+    /// monitor output.
+    #[cfg(feature = "i3-4-12")]
+    FocusedSeparator,
+
     /// Text color for a workspace button when the workspace has focus.
     FocusedWorkspaceText,
 
