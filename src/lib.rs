@@ -467,6 +467,23 @@ impl I3Connection {
                                                                       .unwrap().to_owned()
         })
     }
+
+    /// Gets the list of currently configured binding modes.
+    #[cfg(feature = "i3-4-13")]
+    pub fn get_binding_modes(&mut self) -> Result<reply::BindingModes, MessageError> {
+        if let Err(e) = self.stream.send_i3_message(8, "") {
+            return Err(MessageError::Send(e));
+        }
+        let payload = match self.stream.receive_i3_message() {
+            Ok((_, payload)) => payload,
+            Err(e) => { return Err(MessageError::Receive(e)); },
+        };
+        let modes: Vec<String> = match json::from_str(&payload) {
+            Ok(v) => v,
+            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); },
+        };
+        Ok(reply::BindingModes { modes: modes })
+    }
 }
 
 
@@ -554,6 +571,12 @@ mod test {
     #[test]
     fn get_version() {
         I3Connection::connect().unwrap().get_version().unwrap();
+    }
+
+    #[cfg(feature = "i3-4-13")]
+    #[test]
+    fn get_binding_modes() {
+        I3Connection::connect().unwrap().get_binding_modes().unwrap();
     }
 
     #[test]

@@ -354,3 +354,11 @@ pub struct Version {
     /// The current config path.
     pub loaded_config_file_name: String
 }
+
+/// The reply to the `get_binding_modes` request.
+#[cfg(feature = "i3-4-13")]
+#[derive(Debug)]
+pub struct BindingModes {
+    /// A vector of all currently configured binding modes.
+    pub modes: Vec<String>,
+}

@@ -131,6 +131,10 @@ impl FromStr for WindowEventInfo {
                 "move" => WindowChange::Move,
                 "floating" => WindowChange::Floating,
                 "urgent" => WindowChange::Urgent,
+
+                #[cfg(feature = "i3-4-13")]
+                "mark" => WindowChange::Mark,
+
                 other => {
                     warn!(target: "i3ipc", "Unknown WindowChange {}", other);
                     WindowChange::Unknown
@@ -251,6 +255,11 @@ pub mod inner {
         Floating,
         /// The window has become urgent or lost its urgent status.
         Urgent,
+
+        /// A mark has been added to or removed from the window.
+        #[cfg(feature = "i3-4-13")]
+        Mark,
+
         /// A WindowChange we don't support yet.
         Unknown,
     }
