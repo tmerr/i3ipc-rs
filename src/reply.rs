@@ -221,16 +221,19 @@ pub enum ColorableBarPart {
 
     /// Background color of the bar on the currently focused monitor output.
     #[cfg(feature = "i3-4-12")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-12")))]
     FocusedBackground,
 
     /// Text color to be used for the statusline on the currently focused
     /// monitor output.
     #[cfg(feature = "i3-4-12")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-12")))]
     FocusedStatusline,
 
     /// Text color to be used for the separator on the currently focused
     /// monitor output.
     #[cfg(feature = "i3-4-12")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-12")))]
     FocusedSeparator,
 
     /// Text color for a workspace button when the workspace has focus.
@@ -357,6 +360,7 @@ pub struct Version {
 
 /// The reply to the `get_binding_modes` request.
 #[cfg(feature = "i3-4-13")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
 #[derive(Debug)]
 pub struct BindingModes {
     /// A vector of all currently configured binding modes.

@@ -18,6 +18,7 @@ pub enum Event {
     BindingEvent(BindingEventInfo),
 
     #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     ShutdownEvent(ShutdownEventInfo),
 }
 
@@ -217,11 +218,13 @@ impl FromStr for BindingEventInfo {
 /// Data for `ShutdownEvent`.
 #[derive(Debug)]
 #[cfg(feature = "i3-4-14")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
 pub struct ShutdownEventInfo {
     pub change: ShutdownChange,
 }
 
 #[cfg(feature = "i3-4-14")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
 impl FromStr for ShutdownEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -285,6 +288,7 @@ pub mod inner {
 
         /// A mark has been added to or removed from the window.
         #[cfg(feature = "i3-4-13")]
+        #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
         Mark,
 
         /// A WindowChange we don't support yet.
@@ -333,6 +337,7 @@ pub mod inner {
     /// The kind of shutdown change.
     #[derive(Debug)]
     #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     pub enum ShutdownChange {
         Restart,
         Exit,

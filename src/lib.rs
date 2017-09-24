@@ -15,6 +15,8 @@
 //! This library should cover all of i3's documented ipc features. If it's missing something
 //! please open an issue on github.
 
+#![cfg_attr(feature = "dox", feature(doc_cfg))]
+
 extern crate unix_socket;
 extern crate byteorder;
 #[macro_use]
@@ -211,6 +213,7 @@ pub enum Subscription {
     BarConfig,
     Binding,
     #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     Shutdown,
 }
 
@@ -478,6 +481,7 @@ impl I3Connection {
 
     /// Gets the list of currently configured binding modes.
     #[cfg(feature = "i3-4-13")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
     pub fn get_binding_modes(&mut self) -> Result<reply::BindingModes, MessageError> {
         if let Err(e) = self.stream.send_i3_message(8, "") {
             return Err(MessageError::Send(e));
