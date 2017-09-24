@@ -181,7 +181,9 @@ pub struct Node {
     /// xwininfo(1) and other X11-related tools display (usually in hex). 
     pub window: Option<i32>,
 
-    /// Whether this container (window or workspace) has the urgency hint set. 
+    /// Whether this container (window, split container, floating container or workspace) has the
+    /// urgency hint set, directly or indirectly. All parent containers up until the workspace
+    /// container will be marked urgent if they have at least one urgent child.
     pub urgent: bool,
 
     /// Whether this container is currently focused.
