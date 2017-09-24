@@ -28,7 +28,7 @@ fn main() {
     println!("{}", connection.get_version().unwrap().human_readable);
     
     // fullscreen the focused window
-    connection.command("fullscreen").unwrap();
+    connection.run_command("fullscreen").unwrap();
 }
 ```
 

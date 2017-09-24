@@ -295,9 +295,15 @@ impl I3Connection {
         }
     }
 
+    /// Renamed to run_command
+    #[deprecated]
+    pub fn command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
+        self.run_command(string)
+    }
+
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
     /// in the configuration file) and will be executed directly after receiving it.
-    pub fn command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
+    pub fn run_command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
         if let Err(e) = self.stream.send_i3_message(0, string) {
             return Err(MessageError::Send(e));
         }
@@ -517,33 +523,33 @@ mod test {
     }
 
     #[test]
-    fn command_nothing() {
+    fn run_command_nothing() {
         let mut connection = I3Connection::connect().unwrap();
-        let result = connection.command("").unwrap();
+        let result = connection.run_command("").unwrap();
         assert_eq!(result.outcomes.len(), 0);
     }
 
     #[test]
-    fn command_single_sucess() {
+    fn run_command_single_sucess() {
         let mut connection = I3Connection::connect().unwrap();
-        let a = connection.command("exec /bin/true").unwrap();
+        let a = connection.run_command("exec /bin/true").unwrap();
         assert_eq!(a.outcomes.len(), 1);
         assert!(a.outcomes[0].success);
     }
 
     #[test]
-    fn command_multiple_success() {
+    fn run_command_multiple_success() {
         let mut connection = I3Connection::connect().unwrap();
-        let result = connection.command("exec /bin/true; exec /bin/true").unwrap();
+        let result = connection.run_command("exec /bin/true; exec /bin/true").unwrap();
         assert_eq!(result.outcomes.len(), 2);
         assert!(result.outcomes[0].success);
         assert!(result.outcomes[1].success);
     }
 
     #[test]
-    fn command_fail() {
+    fn run_command_fail() {
         let mut connection = I3Connection::connect().unwrap();
-        let result = connection.command("ThisIsClearlyNotACommand").unwrap();
+        let result = connection.run_command("ThisIsClearlyNotACommand").unwrap();
         assert_eq!(result.outcomes.len(), 1);
         assert!(!result.outcomes[0].success);
     }
