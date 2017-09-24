@@ -16,6 +16,10 @@ pub enum Event {
     WindowEvent(WindowEventInfo),
     BarConfigEvent(BarConfigEventInfo),
     BindingEvent(BindingEventInfo),
+
+    #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+    ShutdownEvent(ShutdownEventInfo),
 }
 
 /// Data for `WorkspaceEvent`.
@@ -131,6 +135,10 @@ impl FromStr for WindowEventInfo {
                 "move" => WindowChange::Move,
                 "floating" => WindowChange::Floating,
                 "urgent" => WindowChange::Urgent,
+
+                #[cfg(feature = "i3-4-13")]
+                "mark" => WindowChange::Mark,
+
                 other => {
                     warn!(target: "i3ipc", "Unknown WindowChange {}", other);
                     WindowChange::Unknown
@@ -207,6 +215,32 @@ impl FromStr for BindingEventInfo {
     }
 }
 
+/// Data for `ShutdownEvent`.
+#[derive(Debug)]
+#[cfg(feature = "i3-4-14")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+pub struct ShutdownEventInfo {
+    pub change: ShutdownChange,
+}
+
+#[cfg(feature = "i3-4-14")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+impl FromStr for ShutdownEventInfo {
+    type Err = json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let val: json::Value = try!(json::from_str(s));
+        let change = match val.find("change").unwrap().as_string().unwrap() {
+            "restart" => ShutdownChange::Restart,
+            "exit" => ShutdownChange::Exit,
+            other => {
+                warn!(target: "i3ipc", "Unknown ShutdownChange {}", other);
+                ShutdownChange::Unknown
+            },
+        };
+        Ok(ShutdownEventInfo { change: change })
+    }
+}
+
 /// Less important types
 pub mod inner {
     /// The kind of workspace change.
@@ -251,6 +285,12 @@ pub mod inner {
         Floating,
         /// The window has become urgent or lost its urgent status.
         Urgent,
+
+        /// A mark has been added to or removed from the window.
+        #[cfg(feature = "i3-4-13")]
+        #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
+        Mark,
+
         /// A WindowChange we don't support yet.
         Unknown,
     }
@@ -291,6 +331,17 @@ pub mod inner {
     pub enum BindingChange {
         Run,
         /// A BindingChange we don't support yet.
+        Unknown,
+    }
+
+    /// The kind of shutdown change.
+    #[derive(Debug)]
+    #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+    pub enum ShutdownChange {
+        Restart,
+        Exit,
+        /// A ShutdownChange we don't support yet.
         Unknown,
     }
 }

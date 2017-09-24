@@ -110,6 +110,16 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
                     "background" => reply::ColorableBarPart::Background,
                     "statusline" => reply::ColorableBarPart::Statusline,
                     "separator" => reply::ColorableBarPart::Separator,
+
+                    #[cfg(feature = "i3-4-12")]
+                    "focused_background" => reply::ColorableBarPart::FocusedBackground,
+
+                    #[cfg(feature = "i3-4-12")]
+                    "focused_statusline" => reply::ColorableBarPart::FocusedStatusline,
+
+                    #[cfg(feature = "i3-4-12")]
+                    "focused_separator" => reply::ColorableBarPart::FocusedSeparator,
+
                     "focused_workspace_text" => reply::ColorableBarPart::FocusedWorkspaceText,
                     "focused_workspace_bg" => reply::ColorableBarPart::FocusedWorkspaceBg,
                     "focused_workspace_border" => reply::ColorableBarPart::FocusedWorkspaceBorder,

@@ -15,6 +15,8 @@
 //! This library should cover all of i3's documented ipc features. If it's missing something
 //! please open an issue on github.
 
+#![cfg_attr(feature = "dox", feature(doc_cfg))]
+
 extern crate unix_socket;
 extern crate byteorder;
 #[macro_use]
@@ -178,7 +180,11 @@ impl<'a> Iterator for EventIterator<'a> {
                 3 => event::Event::WindowEvent(try!(event::WindowEventInfo::from_str(payload))),
                 4 => event::Event::BarConfigEvent(try!(event::BarConfigEventInfo::from_str(payload))),
                 5 => event::Event::BindingEvent(try!(event::BindingEventInfo::from_str(payload))),
-                _ => unreachable!()
+
+                #[cfg(feature = "i3-4-14")]
+                6 => event::Event::ShutdownEvent(try!(event::ShutdownEventInfo::from_str(payload))),
+
+                _ => unreachable!("received an event we aren't subscribed to!")
             })
         }
 
@@ -205,7 +211,10 @@ pub enum Subscription {
     Mode,
     Window,
     BarConfig,
-    Binding
+    Binding,
+    #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+    Shutdown,
 }
 
 /// Abstraction over an ipc socket to i3. Handles events.
@@ -239,7 +248,9 @@ impl I3EventListener {
                         Subscription::Mode => "\"mode\"",
                         Subscription::Window => "\"window\"",
                         Subscription::BarConfig => "\"barconfig_update\"",
-                        Subscription::Binding => "\"binding\""})
+                        Subscription::Binding => "\"binding\"",
+                        #[cfg(feature = "i3-4-14")]
+                        Subscription::Shutdown => "\"shutdown\""})
                     .collect::<Vec<_>>()
                     .join(", ")[..]
             + " ]";
@@ -467,6 +478,24 @@ impl I3Connection {
                                                                       .unwrap().to_owned()
         })
     }
+
+    /// Gets the list of currently configured binding modes.
+    #[cfg(feature = "i3-4-13")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
+    pub fn get_binding_modes(&mut self) -> Result<reply::BindingModes, MessageError> {
+        if let Err(e) = self.stream.send_i3_message(8, "") {
+            return Err(MessageError::Send(e));
+        }
+        let payload = match self.stream.receive_i3_message() {
+            Ok((_, payload)) => payload,
+            Err(e) => { return Err(MessageError::Receive(e)); },
+        };
+        let modes: Vec<String> = match json::from_str(&payload) {
+            Ok(v) => v,
+            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); },
+        };
+        Ok(reply::BindingModes { modes: modes })
+    }
 }
 
 
@@ -554,6 +583,12 @@ mod test {
     #[test]
     fn get_version() {
         I3Connection::connect().unwrap().get_version().unwrap();
+    }
+
+    #[cfg(feature = "i3-4-13")]
+    #[test]
+    fn get_binding_modes() {
+        I3Connection::connect().unwrap().get_binding_modes().unwrap();
     }
 
     #[test]

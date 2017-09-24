@@ -10,8 +10,8 @@ A Rust library for controlling i3-wm through its [IPC interface](https://i3wm.or
 ## Usage
 Add this to your Cargo.toml
 ```toml
-[dependencies]
-i3ipc = "0.7.0"
+[dependencies.i3ipc]
+version = "0.7.0"
 ```
 
 ## Messages:
@@ -59,8 +59,14 @@ fn main() {
 }
 ```
 
-## Compatibility
+## Versioning
 
-This library was last updated for **i3 version 4.11**, but is forward compatible. Contributions are welcome!
+By default i3ipc-rs targets minimum i3 version 4.11. To unlock additional features you can increase this by selecting one of `"i3-4-12"`, ..., `"i3-4-14"` in Cargo.toml.
 
-All documented functionality from i3 version 4.11 can be handled by this library. Additions to the i3 IPC interface that are not understood by this library will generally return an `Unknown` value and log a warning to the target `"i3ipc"` using the [log crate](http://doc.rust-lang.org/log). Binaries using this library should [install a logger](https://doc.rust-lang.org/log/log/index.html#in-executables) to view details of such additions.
+```
+[dependencies.i3ipc]
+version = "0.7.0"
+features = ["i3-4-14"]
+```
+
+Additions to the i3 IPC interface that are not understood by your compiled binary will generally return an `Unknown` value and log a warning to the target `"i3ipc"` using the [log crate](http://doc.rust-lang.org/log). Binaries using this library should [install a logger](https://doc.rust-lang.org/log/log/index.html#in-executables) to view details of such additions.
