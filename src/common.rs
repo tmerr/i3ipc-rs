@@ -19,7 +19,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .unwrap()
                             .iter()
                             .map(|n| build_tree(n))
-                            .collect::<Vec<_>>(),
+                            .collect(),
             None => vec![]
         },
         floating_nodes: match val.find("floating_nodes") {
@@ -27,7 +27,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .unwrap()
                             .iter()
                             .map(|n| build_tree(n))
-                            .collect::<Vec<_>>(),
+                            .collect(),
             None => vec![]
         },
         id: val.find("id").unwrap().as_i64().unwrap(),
