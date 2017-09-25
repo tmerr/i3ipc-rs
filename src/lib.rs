@@ -421,6 +421,15 @@ impl I3Connection {
         let modes: Vec<String> = try!(self.stream.send_receive_i3_message(8, ""));
         Ok(reply::BindingModes { modes: modes })
     }
+
+    /// Returns the last loaded i3 config.
+    #[cfg(feature = "i3-4-14")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+    pub fn get_config(&mut self) -> Result<reply::Config, MessageError> {
+        let j: json::Value = try!(self.stream.send_receive_i3_message(9, ""));
+        let cfg = j.find("config").unwrap().as_string().unwrap();
+        Ok(reply::Config { config: cfg.to_owned() })
+    }
 }
 
 
@@ -514,6 +523,12 @@ mod test {
     #[test]
     fn get_binding_modes() {
         I3Connection::connect().unwrap().get_binding_modes().unwrap();
+    }
+
+    #[cfg(feature = "i3-4-14")]
+    #[test]
+    fn get_config() {
+        I3Connection::connect().unwrap().get_config().unwrap();
     }
 
     #[test]
