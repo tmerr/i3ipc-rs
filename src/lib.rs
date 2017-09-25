@@ -21,6 +21,7 @@ extern crate unix_socket;
 extern crate byteorder;
 #[macro_use]
 extern crate log;
+extern crate serde;
 extern crate serde_json;
 
 use std::{io, fmt, process};
@@ -126,6 +127,8 @@ fn get_socket_path() -> io::Result<String> {
 trait I3Funcs {
     fn send_i3_message(&mut self, u32, &str) -> io::Result<()>;
     fn receive_i3_message(&mut self) -> io::Result<(u32, String)>;
+    fn send_receive_i3_message<T: serde::Deserialize>(&mut self, message_type: u32, payload: &str)
+        -> Result<T, MessageError>;
 }
 
 impl I3Funcs for UnixStream {
@@ -154,6 +157,26 @@ impl I3Funcs for UnixStream {
         try!(self.read_exact(&mut payload_data[..]));
         let payload_string = String::from_utf8_lossy(&payload_data).into_owned();
         Ok((message_type, payload_string))
+    }
+
+    fn send_receive_i3_message<T: serde::Deserialize>(&mut self, message_type: u32, payload: &str)
+            -> Result<T, MessageError> {
+        if let Err(e) = self.send_i3_message(message_type, payload) {
+            return Err(MessageError::Send(e));
+        }
+        let received = match self.receive_i3_message() {
+            Ok((received_type, payload)) => {
+                assert_eq!(message_type, received_type);
+                payload
+            },
+            Err(e) => {
+                return Err(MessageError::Receive(e));
+            }
+        };
+        match json::from_str(&received) {
+            Ok(v) => Ok(v),
+            Err(e) => Err(MessageError::JsonCouldntParse(e)),
+        }
     }
 }
 
@@ -254,17 +277,7 @@ impl I3EventListener {
                     .collect::<Vec<_>>()
                     .join(", ")[..]
             + " ]";
-        if let Err(e) = self.stream.send_i3_message(2, &json) {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-        let j: json::Value = match json::from_str(&payload) {
-            Ok(j) => j,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)) }
-        };
+        let j: json::Value = try!(self.stream.send_receive_i3_message(2, &json));
         let is_success = j.find("success").unwrap().as_boolean().unwrap();
         Ok(reply::Subscribe { success: is_success })
     }
@@ -304,19 +317,7 @@ impl I3Connection {
     /// The payload of the message is a command for i3 (like the commands you can bind to keys
     /// in the configuration file) and will be executed directly after receiving it.
     pub fn run_command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(0, string) {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-
-        let j = match json::from_str::<json::Value>(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
-        // assumes valid json contents
+        let j: json::Value = try!(self.stream.send_receive_i3_message(0, string));
         let commands = j.as_array().unwrap();
         let vec: Vec<_>
             = commands.iter()
@@ -335,18 +336,7 @@ impl I3Connection {
 
     /// Gets the current workspaces.
     pub fn get_workspaces(&mut self) -> Result<reply::Workspaces, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(1, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-
-        let j = match json::from_str::<json::Value>(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
+        let j: json::Value = try!(self.stream.send_receive_i3_message(1, ""));
         let jworkspaces = j.as_array().unwrap();
         let workspaces: Vec<_>
             = jworkspaces.iter()
@@ -366,18 +356,7 @@ impl I3Connection {
 
     /// Gets the current outputs.
     pub fn get_outputs(&mut self) -> Result<reply::Outputs, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(3, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-
-        let j = match json::from_str::<json::Value>(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
+        let j: json::Value = try!(self.stream.send_receive_i3_message(3, ""));
         let joutputs = j.as_array().unwrap();
         let outputs: Vec<_>
             = joutputs.iter()
@@ -399,82 +378,32 @@ impl I3Connection {
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.
     pub fn get_tree(&mut self) -> Result<reply::Node, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(4, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-        let val = match json::from_str::<json::Value>(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
+        let val: json::Value = try!(self.stream.send_receive_i3_message(4, ""));
         Ok(common::build_tree(&val))
     }
 
     /// Gets a list of marks (identifiers for containers to easily jump to them later).
     pub fn get_marks(&mut self) -> Result<reply::Marks, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(5, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-        let marks: Vec<String> = match json::from_str(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
+        let marks: Vec<String> = try!(self.stream.send_receive_i3_message(5, ""));
         Ok(reply::Marks { marks: marks })
     }
 
     /// Gets an array with all configured bar IDs.
     pub fn get_bar_ids(&mut self) -> Result<reply::BarIds, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(6, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-        let ids: Vec<String> = match json::from_str(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
+        let ids: Vec<String> = try!(self.stream.send_receive_i3_message(6, ""));
         Ok(reply::BarIds { ids: ids })
     }
 
     /// Gets the configuration of the workspace bar with the given ID.
     pub fn get_bar_config(&mut self, id: &str) -> Result<reply::BarConfig, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(6, id) {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-        let j = match json::from_str::<json::Value>(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
-        Ok(common::build_bar_config(&j))
+        let ids: json::Value = try!(self.stream.send_receive_i3_message(6, id));
+        Ok(common::build_bar_config(&ids))
     }
 
     /// Gets the version of i3. The reply will include the major, minor, patch and human-readable
     /// version.
     pub fn get_version(&mut self) -> Result<reply::Version, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(7, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); }
-        };
-        let j = match json::from_str::<json::Value>(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); }
-        };
+        let j: json::Value = try!(self.stream.send_receive_i3_message(7, ""));
         Ok(reply::Version {
             major: j.find("major").unwrap().as_i64().unwrap() as i32,
             minor: j.find("minor").unwrap().as_i64().unwrap() as i32,
@@ -489,17 +418,7 @@ impl I3Connection {
     #[cfg(feature = "i3-4-13")]
     #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
     pub fn get_binding_modes(&mut self) -> Result<reply::BindingModes, MessageError> {
-        if let Err(e) = self.stream.send_i3_message(8, "") {
-            return Err(MessageError::Send(e));
-        }
-        let payload = match self.stream.receive_i3_message() {
-            Ok((_, payload)) => payload,
-            Err(e) => { return Err(MessageError::Receive(e)); },
-        };
-        let modes: Vec<String> = match json::from_str(&payload) {
-            Ok(v) => v,
-            Err(e) => { return Err(MessageError::JsonCouldntParse(e)); },
-        };
+        let modes: Vec<String> = try!(self.stream.send_receive_i3_message(8, ""));
         Ok(reply::BindingModes { modes: modes })
     }
 }
