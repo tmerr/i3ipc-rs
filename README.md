@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/tmerr/i3ipc-rs.svg?branch=master)](https://travis-ci.org/tmerr/i3ipc-rs)
 [![Crate](http://meritbadge.herokuapp.com/i3ipc)](https://crates.io/crates/i3ipc)
-[![Docs](https://docs.rs/i3ipc)](https://docs.rs/i3ipc/badge.svg)
+[![Docs](https://docs.rs/i3ipc/badge.svg)](https://docs.rs/i3ipc)
 
 A Rust library for controlling i3-wm through its [IPC interface](https://i3wm.org/docs/ipc.html).
 
