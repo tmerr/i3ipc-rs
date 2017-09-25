@@ -19,7 +19,9 @@ fn main() {
             break;
         }
 
-        let outcomes = connection.command(&command_text).ok().expect("failed to send command").outcomes;
+        let outcomes = connection.run_command(&command_text)
+                                 .ok().expect("failed to send command")
+                                 .outcomes;
         for outcome in outcomes {
             if outcome.success {
                 println!("success");

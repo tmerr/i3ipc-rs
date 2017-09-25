@@ -6,12 +6,20 @@ use reply;
 /// Recursively build the tree of containers from the given json value.
 pub fn build_tree(val: &json::Value) -> reply::Node {
     reply::Node {
+        focus: match val.find("focus") {
+            Some(xs) => xs.as_array()
+                          .unwrap()
+                          .iter()
+                          .map(|x| x.as_i64().unwrap())
+                          .collect(),
+            None => vec![]
+        },
         nodes: match val.find("nodes") {
             Some(nds) => nds.as_array()
                             .unwrap()
                             .iter()
                             .map(|n| build_tree(n))
-                            .collect::<Vec<_>>(),
+                            .collect(),
             None => vec![]
         },
         floating_nodes: match val.find("floating_nodes") {
@@ -19,7 +27,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .unwrap()
                             .iter()
                             .map(|n| build_tree(n))
-                            .collect::<Vec<_>>(),
+                            .collect(),
             None => vec![]
         },
         id: val.find("id").unwrap().as_i64().unwrap(),
