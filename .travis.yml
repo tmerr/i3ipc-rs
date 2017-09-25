@@ -17,8 +17,6 @@ script:
 - |
   travis-cargo build -- --features i3-next &&
   travis-cargo --only nightly doc -- --features dox
-after_success:
-- travis-cargo --only nightly doc-upload -- --features dox
 env:
   global:
   # don't have special dependencies for nightly build
