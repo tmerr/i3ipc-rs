@@ -116,6 +116,11 @@ pub enum NodeLayout {
 /// The reply to the `get_tree` request.
 #[derive(Debug)]
 pub struct Node {
+    /// List of child node IDs (see `nodes`, `floating_nodes` and `id`) in focus order. Traversing
+    /// the tree by following the first entry in this array will result in eventually reaching the
+    /// one node with `focused` set to true.
+    pub focus: Vec<i64>,
+
     /// The child nodes of this container.
     pub nodes: Vec<Node>,
 
