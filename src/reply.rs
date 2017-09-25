@@ -373,3 +373,12 @@ pub struct BindingModes {
     /// A vector of all currently configured binding modes.
     pub modes: Vec<String>,
 }
+
+/// The reply to the `get_config` request.
+#[cfg(feature = "i3-4-14")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
+#[derive(Debug)]
+pub struct Config {
+    /// A string containing the config file as loaded by i3 most recently.
+    pub config: String,
+}
