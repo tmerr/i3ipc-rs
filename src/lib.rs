@@ -24,7 +24,7 @@ extern crate log;
 extern crate serde;
 extern crate serde_json;
 
-use std::{io, fmt, process};
+use std::{env, io, fmt, process};
 use std::io::prelude::*;
 use std::error::Error;
 use std::str::FromStr;
@@ -105,6 +105,10 @@ impl fmt::Display for MessageError {
 }
 
 fn get_socket_path() -> io::Result<String> {
+    if let Ok(sockpath) = env::var("I3SOCK") {
+        return Ok(sockpath);
+    }
+
     let output = try!(process::Command::new("i3")
                                        .arg("--get-socketpath")
                                        .output());
