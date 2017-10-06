@@ -6,7 +6,7 @@ use reply;
 /// Recursively build the tree of containers from the given json value.
 pub fn build_tree(val: &json::Value) -> reply::Node {
     reply::Node {
-        focus: match val.find("focus") {
+        focus: match val.get("focus") {
             Some(xs) => xs.as_array()
                           .unwrap()
                           .iter()
@@ -14,7 +14,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                           .collect(),
             None => vec![]
         },
-        nodes: match val.find("nodes") {
+        nodes: match val.get("nodes") {
             Some(nds) => nds.as_array()
                             .unwrap()
                             .iter()
@@ -22,7 +22,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .collect(),
             None => vec![]
         },
-        floating_nodes: match val.find("floating_nodes") {
+        floating_nodes: match val.get("floating_nodes") {
             Some(nds) => nds.as_array()
                             .unwrap()
                             .iter()
@@ -30,15 +30,15 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                             .collect(),
             None => vec![]
         },
-        id: val.find("id").unwrap().as_i64().unwrap(),
-        name: match val.find("name") {
-            Some(n) => match n.as_string() {
+        id: val.get("id").unwrap().as_i64().unwrap(),
+        name: match val.get("name") {
+            Some(n) => match n.as_str() {
                 Some(s) => Some(s.to_owned()),
                 None => None
             },
             None => None
         },
-        nodetype: match val.find("type").unwrap().as_string().unwrap().as_ref() {
+        nodetype: match val.get("type").unwrap().as_str().unwrap().as_ref() {
             "root" => reply::NodeType::Root,
             "output" => reply::NodeType::Output,
             "con" => reply::NodeType::Con,
@@ -50,7 +50,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                 reply::NodeType::Unknown
             }
         },
-        border: match val.find("border").unwrap().as_string().unwrap().as_ref() {
+        border: match val.get("border").unwrap().as_str().unwrap().as_ref() {
             "normal" => reply::NodeBorder::Normal,
             "none" => reply::NodeBorder::None,
             "pixel" => reply::NodeBorder::Pixel,
@@ -59,8 +59,8 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                 reply::NodeBorder::Unknown
             }
         },
-        current_border_width: val.find("current_border_width").unwrap().as_i64().unwrap() as i32,
-        layout: match val.find("layout").unwrap().as_string().unwrap().as_ref() {
+        current_border_width: val.get("current_border_width").unwrap().as_i64().unwrap() as i32,
+        layout: match val.get("layout").unwrap().as_str().unwrap().as_ref() {
             "splith" => reply::NodeLayout::SplitH,
             "splitv" => reply::NodeLayout::SplitV,
             "stacked" => reply::NodeLayout::Stacked,
@@ -72,46 +72,45 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                 reply::NodeLayout::Unknown
             }
         },
-        percent: match *val.find("percent").unwrap() {
-            json::Value::F64(f) => Some(f),
+        percent: match *val.get("percent").unwrap() {
+            json::Value::Number(ref f) => Some(f.as_f64().unwrap()),
             json::Value::Null => None,
             _ => unreachable!()
         },
-        rect: build_rect(val.find("rect").unwrap()),
-        window_rect: build_rect(val.find("window_rect").unwrap()),
-        deco_rect: build_rect(val.find("deco_rect").unwrap()),
-        geometry: build_rect(val.find("geometry").unwrap()),
-        window: match val.find("window").unwrap().clone() {
-            json::Value::I64(i) => Some(i as i32),
-            json::Value::U64(u) => Some(u as i32),
+        rect: build_rect(val.get("rect").unwrap()),
+        window_rect: build_rect(val.get("window_rect").unwrap()),
+        deco_rect: build_rect(val.get("deco_rect").unwrap()),
+        geometry: build_rect(val.get("geometry").unwrap()),
+        window: match val.get("window").unwrap().clone() {
+            json::Value::Number(i) => Some(i.as_i64().unwrap() as i32),
             json::Value::Null => None,
             _ => unreachable!()
         },
-        urgent: val.find("urgent").unwrap().as_boolean().unwrap(),
-        focused: val.find("focused").unwrap().as_boolean().unwrap()
+        urgent: val.get("urgent").unwrap().as_bool().unwrap(),
+        focused: val.get("focused").unwrap().as_bool().unwrap()
     }
 }
 
 pub fn build_rect(jrect: &json::Value) -> (i32, i32, i32, i32) {
-    let x = jrect.find("x").unwrap().as_i64().unwrap() as i32;
-    let y = jrect.find("y").unwrap().as_i64().unwrap() as i32;
-    let width = jrect.find("width").unwrap().as_i64().unwrap() as i32;
-    let height = jrect.find("height").unwrap().as_i64().unwrap() as i32;
+    let x = jrect.get("x").unwrap().as_i64().unwrap() as i32;
+    let y = jrect.get("y").unwrap().as_i64().unwrap() as i32;
+    let width = jrect.get("width").unwrap().as_i64().unwrap() as i32;
+    let height = jrect.get("height").unwrap().as_i64().unwrap() as i32;
     (x, y, width, height)
 }
 
 pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
     reply::BarConfig {
-        id: j.find("id").unwrap().as_string().unwrap().to_owned(),
-        mode: j.find("mode").unwrap().as_string().unwrap().to_owned(),
-        position: j.find("position").unwrap().as_string().unwrap().to_owned(),
-        status_command: j.find("status_command").unwrap().as_string().unwrap().to_owned(),
-        font: j.find("font").unwrap().as_string().unwrap().to_owned(),
-        workspace_buttons: j.find("workspace_buttons").unwrap().as_boolean().unwrap(),
-        binding_mode_indicator: j.find("binding_mode_indicator").unwrap().as_boolean().unwrap(),
-        verbose: j.find("verbose").unwrap().as_boolean().unwrap(),
+        id: j.get("id").unwrap().as_str().unwrap().to_owned(),
+        mode: j.get("mode").unwrap().as_str().unwrap().to_owned(),
+        position: j.get("position").unwrap().as_str().unwrap().to_owned(),
+        status_command: j.get("status_command").unwrap().as_str().unwrap().to_owned(),
+        font: j.get("font").unwrap().as_str().unwrap().to_owned(),
+        workspace_buttons: j.get("workspace_buttons").unwrap().as_bool().unwrap(),
+        binding_mode_indicator: j.get("binding_mode_indicator").unwrap().as_bool().unwrap(),
+        verbose: j.get("verbose").unwrap().as_bool().unwrap(),
         colors: {
-            let colors = j.find("colors").unwrap().as_object().unwrap();
+            let colors = j.get("colors").unwrap().as_object().unwrap();
             let mut map = HashMap::new();
             for c in colors.keys() {
                 let enum_key = match c.as_ref() {
@@ -148,7 +147,7 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
                         reply::ColorableBarPart::Unknown
                     }
                 };
-                let hex = colors.get(c).unwrap().as_string().unwrap().to_owned();
+                let hex = colors.get(c).unwrap().as_str().unwrap().to_owned();
                 map.insert(enum_key, hex);
             }
             map

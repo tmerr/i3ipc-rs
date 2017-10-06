@@ -40,7 +40,7 @@ impl FromStr for WorkspaceEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(WorkspaceEventInfo {
-            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
                 "focus" => WorkspaceChange::Focus,
                 "init" => WorkspaceChange::Init,
                 "empty" => WorkspaceChange::Empty,
@@ -54,11 +54,11 @@ impl FromStr for WorkspaceEventInfo {
                     WorkspaceChange::Unknown
                 }
             },
-            current: match val.find("current").unwrap().clone() {
+            current: match val.get("current").unwrap().clone() {
                 json::Value::Null => None,
                 val => Some(common::build_tree(&val))
             },
-            old: match val.find("old") {
+            old: match val.get("old") {
                 Some(o) => match o.clone() {
                     json::Value::Null => None,
                     val => Some(common::build_tree(&val))
@@ -81,7 +81,7 @@ impl FromStr for OutputEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(OutputEventInfo {
-            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
                 "unspecified" => OutputChange::Unspecified,
                 other => {
                     warn!(target: "i3ipc", "Unknown OutputChange {}", other);
@@ -105,7 +105,7 @@ impl FromStr for ModeEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(ModeEventInfo {
-            change: val.find("change").unwrap().as_string().unwrap().to_owned()
+            change: val.get("change").unwrap().as_str().unwrap().to_owned()
         })
     }
 }
@@ -126,7 +126,7 @@ impl FromStr for WindowEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(WindowEventInfo {
-            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
                 "new" => WindowChange::New,
                 "close" => WindowChange::Close,
                 "focus" => WindowChange::Focus,
@@ -144,7 +144,7 @@ impl FromStr for WindowEventInfo {
                     WindowChange::Unknown
                 }
             },
-            container: common::build_tree(val.find("container").unwrap())
+            container: common::build_tree(val.get("container").unwrap())
         })
     }
 }
@@ -181,9 +181,9 @@ impl FromStr for BindingEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
-        let bind = val.find("binding").unwrap();
+        let bind = val.get("binding").unwrap();
         Ok(BindingEventInfo {
-            change: match val.find("change").unwrap().as_string().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
                 "run" => BindingChange::Run,
                 other => {
                     warn!(target: "i3ipc", "Unknown BindingChange {}", other);
@@ -191,18 +191,18 @@ impl FromStr for BindingEventInfo {
                 }
             },
             binding: Binding {
-                command: bind.find("command").unwrap().as_string().unwrap().to_owned(),
-                event_state_mask: bind.find("event_state_mask").unwrap()
+                command: bind.get("command").unwrap().as_str().unwrap().to_owned(),
+                event_state_mask: bind.get("event_state_mask").unwrap()
                          .as_array().unwrap().iter()
-                         .map(|m| m.as_string().unwrap().to_owned())
+                         .map(|m| m.as_str().unwrap().to_owned())
                          .collect(),
-                input_code: bind.find("input_code").unwrap().as_i64().unwrap() as i32,
-                symbol: match bind.find("symbol").unwrap().clone() {
+                input_code: bind.get("input_code").unwrap().as_i64().unwrap() as i32,
+                symbol: match bind.get("symbol").unwrap().clone() {
                     json::Value::String(s) => Some(s),
                     json::Value::Null => None,
                     _ => unreachable!()
                 },
-                input_type: match bind.find("input_type").unwrap().as_string().unwrap().as_ref() {
+                input_type: match bind.get("input_type").unwrap().as_str().unwrap().as_ref() {
                     "keyboard" => InputType::Keyboard,
                     "mouse" => InputType::Mouse,
                     other => {
@@ -229,7 +229,7 @@ impl FromStr for ShutdownEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
-        let change = match val.find("change").unwrap().as_string().unwrap() {
+        let change = match val.get("change").unwrap().as_str().unwrap() {
             "restart" => ShutdownChange::Restart,
             "exit" => ShutdownChange::Exit,
             other => {

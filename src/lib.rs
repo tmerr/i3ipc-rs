@@ -127,7 +127,7 @@ fn get_socket_path() -> io::Result<String> {
 trait I3Funcs {
     fn send_i3_message(&mut self, u32, &str) -> io::Result<()>;
     fn receive_i3_message(&mut self) -> io::Result<(u32, String)>;
-    fn send_receive_i3_message<T: serde::Deserialize>(&mut self, message_type: u32, payload: &str)
+    fn send_receive_i3_message<T: serde::de::DeserializeOwned>(&mut self, message_type: u32, payload: &str)
         -> Result<T, MessageError>;
 }
 
@@ -159,7 +159,7 @@ impl I3Funcs for UnixStream {
         Ok((message_type, payload_string))
     }
 
-    fn send_receive_i3_message<T: serde::Deserialize>(&mut self, message_type: u32, payload: &str)
+    fn send_receive_i3_message<T: serde::de::DeserializeOwned>(&mut self, message_type: u32, payload: &str)
             -> Result<T, MessageError> {
         if let Err(e) = self.send_i3_message(message_type, payload) {
             return Err(MessageError::Send(e));
@@ -278,7 +278,7 @@ impl I3EventListener {
                     .join(", ")[..]
             + " ]";
         let j: json::Value = try!(self.stream.send_receive_i3_message(2, &json));
-        let is_success = j.find("success").unwrap().as_boolean().unwrap();
+        let is_success = j.get("success").unwrap().as_bool().unwrap();
         Ok(reply::Subscribe { success: is_success })
     }
 
@@ -323,9 +323,9 @@ impl I3Connection {
             = commands.iter()
                       .map(|c| 
                            reply::CommandOutcome {
-                               success: c.find("success").unwrap().as_boolean().unwrap(),
-                               error: match c.find("error") {
-                                   Some(val) => Some(val.as_string().unwrap().to_owned()),
+                               success: c.get("success").unwrap().as_bool().unwrap(),
+                               error: match c.get("error") {
+                                   Some(val) => Some(val.as_str().unwrap().to_owned()),
                                    None => None
                                }
                            })
@@ -342,13 +342,13 @@ impl I3Connection {
             = jworkspaces.iter()
                          .map(|w|
                               reply::Workspace {
-                                  num: w.find("num").unwrap().as_i64().unwrap() as i32,
-                                  name: w.find("name").unwrap().as_string().unwrap().to_owned(),
-                                  visible: w.find("visible").unwrap().as_boolean().unwrap(),
-                                  focused: w.find("focused").unwrap().as_boolean().unwrap(),
-                                  urgent: w.find("urgent").unwrap().as_boolean().unwrap(),
-                                  rect: common::build_rect(w.find("rect").unwrap()),
-                                  output: w.find("output").unwrap().as_string().unwrap().to_owned()
+                                  num: w.get("num").unwrap().as_i64().unwrap() as i32,
+                                  name: w.get("name").unwrap().as_str().unwrap().to_owned(),
+                                  visible: w.get("visible").unwrap().as_bool().unwrap(),
+                                  focused: w.get("focused").unwrap().as_bool().unwrap(),
+                                  urgent: w.get("urgent").unwrap().as_bool().unwrap(),
+                                  rect: common::build_rect(w.get("rect").unwrap()),
+                                  output: w.get("output").unwrap().as_str().unwrap().to_owned()
                               })
                          .collect();
         Ok(reply::Workspaces { workspaces: workspaces })
@@ -362,15 +362,15 @@ impl I3Connection {
             = joutputs.iter()
                       .map(|o|
                            reply::Output {
-                               name: o.find("name").unwrap().as_string().unwrap().to_owned(),
-                               active: o.find("active").unwrap().as_boolean().unwrap(),
-                               primary: o.find("primary").unwrap().as_boolean().unwrap(),
-                               current_workspace: match o.find("current_workspace").unwrap().clone() {
+                               name: o.get("name").unwrap().as_str().unwrap().to_owned(),
+                               active: o.get("active").unwrap().as_bool().unwrap(),
+                               primary: o.get("primary").unwrap().as_bool().unwrap(),
+                               current_workspace: match o.get("current_workspace").unwrap().clone() {
                                    json::Value::String(c_w) => Some(c_w),
                                    json::Value::Null => None,
                                    _ => unreachable!()
                                },
-                               rect: common::build_rect(o.find("rect").unwrap())
+                               rect: common::build_rect(o.get("rect").unwrap())
                            })
                       .collect();
         Ok(reply::Outputs { outputs: outputs })
@@ -405,11 +405,11 @@ impl I3Connection {
     pub fn get_version(&mut self) -> Result<reply::Version, MessageError> {
         let j: json::Value = try!(self.stream.send_receive_i3_message(7, ""));
         Ok(reply::Version {
-            major: j.find("major").unwrap().as_i64().unwrap() as i32,
-            minor: j.find("minor").unwrap().as_i64().unwrap() as i32,
-            patch: j.find("patch").unwrap().as_i64().unwrap() as i32,
-            human_readable: j.find("human_readable").unwrap().as_string().unwrap().to_owned(),
-            loaded_config_file_name: j.find("loaded_config_file_name").unwrap().as_string()
+            major: j.get("major").unwrap().as_i64().unwrap() as i32,
+            minor: j.get("minor").unwrap().as_i64().unwrap() as i32,
+            patch: j.get("patch").unwrap().as_i64().unwrap() as i32,
+            human_readable: j.get("human_readable").unwrap().as_str().unwrap().to_owned(),
+            loaded_config_file_name: j.get("loaded_config_file_name").unwrap().as_str()
                                                                       .unwrap().to_owned()
         })
     }
@@ -427,7 +427,7 @@ impl I3Connection {
     #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     pub fn get_config(&mut self) -> Result<reply::Config, MessageError> {
         let j: json::Value = try!(self.stream.send_receive_i3_message(9, ""));
-        let cfg = j.find("config").unwrap().as_string().unwrap();
+        let cfg = j.get("config").unwrap().as_str().unwrap();
         Ok(reply::Config { config: cfg.to_owned() })
     }
 }
