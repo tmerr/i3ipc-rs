@@ -17,7 +17,6 @@
 
 #![cfg_attr(feature = "dox", feature(doc_cfg))]
 
-extern crate unix_socket;
 extern crate byteorder;
 #[macro_use]
 extern crate log;
@@ -28,8 +27,8 @@ use std::{io, fmt, process};
 use std::io::prelude::*;
 use std::error::Error;
 use std::str::FromStr;
+use std::os::unix::net::UnixStream;
 
-use unix_socket::UnixStream;
 use serde_json as json;
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 
