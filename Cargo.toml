@@ -7,11 +7,10 @@ license = "MIT"
 repository = "https://github.com/tmerr/i3ipc-rs"
 
 [dependencies]
-unix_socket = "0.4.5"
-byteorder = "0.3"
-log = "0.3.7"
-serde = "0.6.0"
-serde_json = "0.6.0"
+byteorder = "1.1.0"
+log = "0.3.8"
+serde = "1.0.15"
+serde_json = "1.0.3"
 
 [features]
 i3-4-12 = []
