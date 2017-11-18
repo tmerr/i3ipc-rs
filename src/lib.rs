@@ -252,7 +252,7 @@ pub struct I3EventListener {
 impl I3EventListener {
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3EventListener, EstablishError> {
-        return match get_socket_path() {
+        match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
                     Ok(stream) => Ok(I3EventListener { stream: stream }),
@@ -300,7 +300,7 @@ pub struct I3Connection {
 impl I3Connection {
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3Connection, EstablishError> {
-        return match get_socket_path() {
+        match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
                     Ok(stream) => Ok(I3Connection { stream: stream }),
