@@ -57,8 +57,7 @@ impl Error for EstablishError {
     }
     fn cause(&self) -> Option<&Error> {
         match *self {
-            EstablishError::GetSocketPathError(ref e) => Some(e),
-            EstablishError::SocketError(ref e) => Some(e)
+            EstablishError::GetSocketPathError(ref e) | EstablishError::SocketError(ref e) => Some(e)
         }
     }
 }
@@ -90,8 +89,7 @@ impl Error for MessageError {
     }
     fn cause(&self) -> Option<&Error> {
         match *self {
-            MessageError::Send(ref e) => Some(e),
-            MessageError::Receive(ref e) => Some(e),
+            MessageError::Send(ref e) | MessageError::Receive(ref e) => Some(e),
             MessageError::JsonCouldntParse(ref e) => Some(e),
         }
     }
