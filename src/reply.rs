@@ -1,6 +1,7 @@
 //! Abstractions for the replies passed back from i3.
 
 use std::collections::HashMap;
+use std::ops::Deref;
 
 /// The outcome of a single command.
 #[derive(Debug)]
@@ -48,6 +49,14 @@ pub struct Workspaces {
     pub workspaces: Vec<Workspace>,
 }
 
+impl Deref for Workspaces {
+    type Target = Vec<Workspace>;
+    /// Returns the interior `Vec<Workspace>`.
+    fn deref(&self) -> &Vec<Workspace> {
+        &self.workspaces
+    }
+}
+
 /// The reply to the `subscribe` request.
 #[derive(Debug)]
 pub struct Subscribe {
@@ -78,6 +87,14 @@ pub struct Output {
 pub struct Outputs {
     /// A list of outputs (displays)
     pub outputs: Vec<Output>
+}
+
+impl Deref for Outputs {
+    type Target = Vec<Output>;
+    /// Returns the interior `Vec<Output>`.
+    fn deref(&self) -> &Vec<Output> {
+        &self.outputs
+    }
 }
 
 #[derive(Debug)]
@@ -205,6 +222,14 @@ pub struct Marks {
     pub marks: Vec<String>
 }
 
+impl Deref for Marks {
+    type Target = Vec<String>;
+    /// Returns the interior `Vec<String>`.
+    fn deref(&self) -> &Vec<String> {
+        &self.marks
+    }
+}
+
 /// The reply to the `get_bar_ids` request.
 ///
 /// This can be used by third-party workspace bars (especially i3bar, but others are free to
@@ -213,6 +238,14 @@ pub struct Marks {
 pub struct BarIds {
     /// A vector of configured bar IDs.
     pub ids: Vec<String>
+}
+
+impl Deref for BarIds {
+    type Target = Vec<String>;
+    /// Returns the interior `Vec<String>`.
+    fn deref(&self) -> &Vec<String> {
+        &self.ids
+    }
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
@@ -372,6 +405,16 @@ pub struct Version {
 pub struct BindingModes {
     /// A vector of all currently configured binding modes.
     pub modes: Vec<String>,
+}
+
+#[cfg(feature = "i3-4-13")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
+impl Deref for BindingModes {
+    type Target = Vec<String>;
+    /// Returns the interior `Vec<String>`.
+    fn deref(&self) -> &Vec<String> {
+        &self.modes
+    }
 }
 
 /// The reply to the `get_config` request.
