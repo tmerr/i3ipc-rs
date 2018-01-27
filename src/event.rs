@@ -40,7 +40,7 @@ impl FromStr for WorkspaceEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(WorkspaceEventInfo {
-            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap() {
                 "focus" => WorkspaceChange::Focus,
                 "init" => WorkspaceChange::Init,
                 "empty" => WorkspaceChange::Empty,
@@ -81,7 +81,7 @@ impl FromStr for OutputEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(OutputEventInfo {
-            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap() {
                 "unspecified" => OutputChange::Unspecified,
                 other => {
                     warn!(target: "i3ipc", "Unknown OutputChange {}", other);
@@ -126,7 +126,7 @@ impl FromStr for WindowEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(WindowEventInfo {
-            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap() {
                 "new" => WindowChange::New,
                 "close" => WindowChange::Close,
                 "focus" => WindowChange::Focus,
@@ -183,7 +183,7 @@ impl FromStr for BindingEventInfo {
         let val: json::Value = try!(json::from_str(s));
         let bind = val.get("binding").unwrap();
         Ok(BindingEventInfo {
-            change: match val.get("change").unwrap().as_str().unwrap().as_ref() {
+            change: match val.get("change").unwrap().as_str().unwrap() {
                 "run" => BindingChange::Run,
                 other => {
                     warn!(target: "i3ipc", "Unknown BindingChange {}", other);
@@ -202,7 +202,7 @@ impl FromStr for BindingEventInfo {
                     json::Value::Null => None,
                     _ => unreachable!()
                 },
-                input_type: match bind.get("input_type").unwrap().as_str().unwrap().as_ref() {
+                input_type: match bind.get("input_type").unwrap().as_str().unwrap() {
                     "keyboard" => InputType::Keyboard,
                     "mouse" => InputType::Mouse,
                     other => {

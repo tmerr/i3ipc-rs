@@ -57,8 +57,7 @@ impl Error for EstablishError {
     }
     fn cause(&self) -> Option<&Error> {
         match *self {
-            EstablishError::GetSocketPathError(ref e) => Some(e),
-            EstablishError::SocketError(ref e) => Some(e)
+            EstablishError::GetSocketPathError(ref e) | EstablishError::SocketError(ref e) => Some(e)
         }
     }
 }
@@ -90,8 +89,7 @@ impl Error for MessageError {
     }
     fn cause(&self) -> Option<&Error> {
         match *self {
-            MessageError::Send(ref e) => Some(e),
-            MessageError::Receive(ref e) => Some(e),
+            MessageError::Send(ref e) | MessageError::Receive(ref e) => Some(e),
             MessageError::JsonCouldntParse(ref e) => Some(e),
         }
     }
@@ -117,7 +115,7 @@ fn get_socket_path() -> io::Result<String> {
                   .to_owned())
     } else {
         let prefix = "i3 --getsocketpath didn't return 0";
-        let error_text = if output.stderr.len() > 0 {
+        let error_text = if !output.stderr.is_empty() {
             format!("{}. stderr: {:?}", prefix, output.stderr)
         } else {
             prefix.to_owned()
@@ -252,7 +250,7 @@ pub struct I3EventListener {
 impl I3EventListener {
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3EventListener, EstablishError> {
-        return match get_socket_path() {
+        match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
                     Ok(stream) => Ok(I3EventListener { stream: stream }),
@@ -300,7 +298,7 @@ pub struct I3Connection {
 impl I3Connection {
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3Connection, EstablishError> {
-        return match get_socket_path() {
+        match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
                     Ok(stream) => Ok(I3Connection { stream: stream }),

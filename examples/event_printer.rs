@@ -7,11 +7,11 @@ use i3ipc::I3EventListener;
 use i3ipc::Subscription;
 
 fn main() {
-    let mut listener = I3EventListener::connect().ok().expect("failed to connect");
+    let mut listener = I3EventListener::connect().expect("failed to connect");
     let subs = [Subscription::Workspace, Subscription::Output, Subscription::Mode,
                 Subscription::Window, Subscription::BarConfig, Subscription::Binding];
-    listener.subscribe(&subs).ok().expect("failed to subscribe");
+    listener.subscribe(&subs).expect("failed to subscribe");
     for event in listener.listen() {
-        println!("{:?}\n", event.ok().expect("failed to get event"))
+        println!("{:?}\n", event.expect("failed to get event"))
     }
 }

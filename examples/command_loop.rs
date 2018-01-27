@@ -6,7 +6,7 @@ use i3ipc::I3Connection;
 
 fn main() {
     println!("Executes i3 commands in a loop. Enter \"q\" at any time to quit.");
-    let mut connection = I3Connection::connect().ok().expect("failed to connect");
+    let mut connection = I3Connection::connect().expect("failed to connect");
     let stdin = io::stdin();
     let mut stdout = io::stdout();
     loop {
@@ -20,7 +20,7 @@ fn main() {
         }
 
         let outcomes = connection.run_command(&command_text)
-                                 .ok().expect("failed to send command")
+                                 .expect("failed to send command")
                                  .outcomes;
         for outcome in outcomes {
             if outcome.success {

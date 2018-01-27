@@ -38,7 +38,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             },
             None => None
         },
-        nodetype: match val.get("type").unwrap().as_str().unwrap().as_ref() {
+        nodetype: match val.get("type").unwrap().as_str().unwrap() {
             "root" => reply::NodeType::Root,
             "output" => reply::NodeType::Output,
             "con" => reply::NodeType::Con,
@@ -50,7 +50,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                 reply::NodeType::Unknown
             }
         },
-        border: match val.get("border").unwrap().as_str().unwrap().as_ref() {
+        border: match val.get("border").unwrap().as_str().unwrap() {
             "normal" => reply::NodeBorder::Normal,
             "none" => reply::NodeBorder::None,
             "pixel" => reply::NodeBorder::Pixel,
@@ -60,7 +60,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             }
         },
         current_border_width: val.get("current_border_width").unwrap().as_i64().unwrap() as i32,
-        layout: match val.get("layout").unwrap().as_str().unwrap().as_ref() {
+        layout: match val.get("layout").unwrap().as_str().unwrap() {
             "splith" => reply::NodeLayout::SplitH,
             "splitv" => reply::NodeLayout::SplitV,
             "stacked" => reply::NodeLayout::Stacked,
