@@ -4,7 +4,7 @@
 //! could send a command or get the hierarchy of containers. With
 //! `I3EventListener` you could listen for when the focused window changes. One of the goals is
 //! is to make this process as fool-proof as possible: usage should follow from the type
-//! signatures. 
+//! signatures.
 //!
 //! The types in the `event` and `reply` modules are near direct translations from the JSON
 //! used to talk to i3. The relevant
@@ -103,6 +103,9 @@ impl fmt::Display for MessageError {
 
 fn get_socket_path() -> io::Result<String> {
     if let Ok(sockpath) = env::var("I3SOCK") {
+        return Ok(sockpath);
+    }
+    if let Ok(sockpath) = env::var("SWAYSOCK") {
         return Ok(sockpath);
     }
 
@@ -216,7 +219,7 @@ impl<'a> Iterator for EventIterator<'a> {
             Ok((msgint, payload)) => {
                 // strip the highest order bit indicating it's an event.
                 let msgtype = (msgint << 1) >> 1;
-                
+
                 Some(match build_event(msgtype, &payload) {
                     Ok(event) => Ok(event),
                     Err(e) => Err(MessageError::JsonCouldntParse(e)),
@@ -322,7 +325,7 @@ impl I3Connection {
         let commands = j.as_array().unwrap();
         let vec: Vec<_>
             = commands.iter()
-                      .map(|c| 
+                      .map(|c|
                            reply::CommandOutcome {
                                success: c.get("success").unwrap().as_bool().unwrap(),
                                error: match c.get("error") {
@@ -445,7 +448,7 @@ mod test {
     // for the following tests send a request and get the reponse.
     // response types are specific so often getting them at all indicates success.
     // can't do much better without mocking an i3 installation.
-    
+
     #[test]
     fn connect() {
         I3Connection::connect().unwrap();
