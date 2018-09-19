@@ -105,6 +105,7 @@ fn get_socket_path() -> io::Result<String> {
     if let Ok(sockpath) = env::var("I3SOCK") {
         return Ok(sockpath);
     }
+    // Sway support is an untested and unsupported feature
     if let Ok(sockpath) = env::var("SWAYSOCK") {
         return Ok(sockpath);
     }
