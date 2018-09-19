@@ -80,7 +80,7 @@ pub struct Outputs {
     pub outputs: Vec<Output>
 }
 
-#[derive(Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum NodeType {
     Root,
     Output,
@@ -92,7 +92,7 @@ pub enum NodeType {
     Unknown,
 }
 
-#[derive(Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum NodeBorder {
     Normal,
     None,
@@ -101,7 +101,7 @@ pub enum NodeBorder {
     Unknown,
 }
 
-#[derive(Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum NodeLayout {
     SplitH,
     SplitV,
