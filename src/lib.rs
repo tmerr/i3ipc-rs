@@ -114,7 +114,7 @@ fn get_socket_path() -> io::Result<String> {
                   .trim_right_matches('\n')
                   .to_owned())
     } else {
-        let prefix = "i3 --getsocketpath didn't return 0";
+        let prefix = "i3 --get-socketpath didn't return 0";
         let error_text = if !output.stderr.is_empty() {
             format!("{}. stderr: {:?}", prefix, output.stderr)
         } else {
