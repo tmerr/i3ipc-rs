@@ -237,7 +237,7 @@ impl FromStr for ShutdownEventInfo {
                 ShutdownChange::Unknown
             },
         };
-        Ok(ShutdownEventInfo { change: change })
+        Ok(ShutdownEventInfo { change })
     }
 }
 

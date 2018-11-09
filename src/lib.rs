@@ -257,7 +257,7 @@ impl I3EventListener {
         match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
-                    Ok(stream) => Ok(I3EventListener { stream: stream }),
+                    Ok(stream) => Ok(I3EventListener { stream }),
                     Err(error) => Err(EstablishError::SocketError(error))
                 }
             }
@@ -305,7 +305,7 @@ impl I3Connection {
         match get_socket_path() {
             Ok(path) => {
                 match UnixStream::connect(path) {
-                    Ok(stream) => Ok(I3Connection { stream: stream }),
+                    Ok(stream) => Ok(I3Connection { stream }),
                     Err(error) => Err(EstablishError::SocketError(error))
                 }
             }
@@ -356,7 +356,7 @@ impl I3Connection {
                                   output: w.get("output").unwrap().as_str().unwrap().to_owned()
                               })
                          .collect();
-        Ok(reply::Workspaces { workspaces: workspaces })
+        Ok(reply::Workspaces { workspaces })
     }
 
     /// Gets the current outputs.
@@ -378,7 +378,7 @@ impl I3Connection {
                                rect: common::build_rect(o.get("rect").unwrap())
                            })
                       .collect();
-        Ok(reply::Outputs { outputs: outputs })
+        Ok(reply::Outputs { outputs })
     }
 
     /// Gets the layout tree. i3 uses a tree as data structure which includes every container.
@@ -390,13 +390,13 @@ impl I3Connection {
     /// Gets a list of marks (identifiers for containers to easily jump to them later).
     pub fn get_marks(&mut self) -> Result<reply::Marks, MessageError> {
         let marks: Vec<String> = try!(self.stream.send_receive_i3_message(5, ""));
-        Ok(reply::Marks { marks: marks })
+        Ok(reply::Marks { marks })
     }
 
     /// Gets an array with all configured bar IDs.
     pub fn get_bar_ids(&mut self) -> Result<reply::BarIds, MessageError> {
         let ids: Vec<String> = try!(self.stream.send_receive_i3_message(6, ""));
-        Ok(reply::BarIds { ids: ids })
+        Ok(reply::BarIds { ids })
     }
 
     /// Gets the configuration of the workspace bar with the given ID.
@@ -424,7 +424,7 @@ impl I3Connection {
     #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-13")))]
     pub fn get_binding_modes(&mut self) -> Result<reply::BindingModes, MessageError> {
         let modes: Vec<String> = try!(self.stream.send_receive_i3_message(8, ""));
-        Ok(reply::BindingModes { modes: modes })
+        Ok(reply::BindingModes { modes })
     }
 
     /// Returns the last loaded i3 config.
