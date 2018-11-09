@@ -313,8 +313,7 @@ impl I3Connection {
         }
     }
 
-    /// Renamed to run_command
-    #[deprecated]
+    #[deprecated(since = "0.8.0", note="Renamed to run_command")]
     pub fn command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
         self.run_command(string)
     }
