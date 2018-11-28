@@ -80,6 +80,15 @@ pub struct Outputs {
     pub outputs: Vec<Output>
 }
 
+#[derive(Eq, PartialEq, Debug, Hash)]
+pub enum WindowProperty {
+    Title,
+    Instance,
+    Class,
+    WindowRole,
+    TransientFor,
+}
+
 #[derive(Eq, PartialEq, Debug)]
 pub enum NodeType {
     Root,
@@ -185,6 +194,9 @@ pub struct Node {
     /// to null for split containers or otherwise empty containers. This ID corresponds to what
     /// xwininfo(1) and other X11-related tools display (usually in hex). 
     pub window: Option<i32>,
+
+    /// X11 window properties title, instance, class, window_role and transient_for.
+    pub window_properties: Option<HashMap<WindowProperty, String>>,
 
     /// Whether this container (window, split container, floating container or workspace) has the
     /// urgency hint set, directly or indirectly. All parent containers up until the workspace

@@ -599,6 +599,7 @@ mod test {
                 "deco_rect": { "x": 1, "y": 1, "width": 631, "height": 365 },
                 "geometry": { "x": 6, "y": 6, "width": 10, "height": 10 },
                 "window": 1,
+                "window_properties": { "class": "Firefox", "instance": "Navigator", "window_role": "browser", "title": "github.com - Mozilla Firefox", "transient_for": null },
                 "urgent": false,
                 "focused": true
             }
