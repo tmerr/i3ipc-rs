@@ -1,9 +1,9 @@
 //! Abstractions for the events passed back from i3.
 
+use common;
 use reply;
 use serde_json as json;
 use std::str::FromStr;
-use common;
 
 use event::inner::*;
 
@@ -32,7 +32,7 @@ pub struct WorkspaceEventInfo {
     /// Will be `Some` only when `change == Focus` *and* there was a previous workspace.
     /// Note that if the previous workspace was empty it will get destroyed when switching, but
     /// will still appear here.
-    pub old: Option<reply::Node>
+    pub old: Option<reply::Node>,
 }
 
 impl FromStr for WorkspaceEventInfo {
@@ -56,15 +56,15 @@ impl FromStr for WorkspaceEventInfo {
             },
             current: match val.get("current").unwrap().clone() {
                 json::Value::Null => None,
-                val => Some(common::build_tree(&val))
+                val => Some(common::build_tree(&val)),
             },
             old: match val.get("old") {
                 Some(o) => match o.clone() {
                     json::Value::Null => None,
-                    val => Some(common::build_tree(&val))
+                    val => Some(common::build_tree(&val)),
                 },
-                None => None
-            }
+                None => None,
+            },
         })
     }
 }
@@ -73,7 +73,7 @@ impl FromStr for WorkspaceEventInfo {
 #[derive(Debug)]
 pub struct OutputEventInfo {
     /// The type of change.
-    pub change: OutputChange
+    pub change: OutputChange,
 }
 
 impl FromStr for OutputEventInfo {
@@ -87,7 +87,7 @@ impl FromStr for OutputEventInfo {
                     warn!(target: "i3ipc", "Unknown OutputChange {}", other);
                     OutputChange::Unknown
                 }
-            }
+            },
         })
     }
 }
@@ -97,7 +97,7 @@ impl FromStr for OutputEventInfo {
 pub struct ModeEventInfo {
     /// The name of current mode in use. It is the same as specified in config when creating a
     /// mode. The default mode is simply named default.
-    pub change: String
+    pub change: String,
 }
 
 impl FromStr for ModeEventInfo {
@@ -105,7 +105,7 @@ impl FromStr for ModeEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(ModeEventInfo {
-            change: val.get("change").unwrap().as_str().unwrap().to_owned()
+            change: val.get("change").unwrap().as_str().unwrap().to_owned(),
         })
     }
 }
@@ -118,7 +118,7 @@ pub struct WindowEventInfo {
     /// The window's parent container. Be aware that for the "new" event, the container will hold
     /// the initial name of the newly reparented window (e.g. if you run urxvt with a shell that
     /// changes the title, you will still at this point get the window title as "urxvt").
-    pub container: reply::Node
+    pub container: reply::Node,
 }
 
 impl FromStr for WindowEventInfo {
@@ -144,7 +144,7 @@ impl FromStr for WindowEventInfo {
                     WindowChange::Unknown
                 }
             },
-            container: common::build_tree(val.get("container").unwrap())
+            container: common::build_tree(val.get("container").unwrap()),
         })
     }
 }
@@ -153,7 +153,7 @@ impl FromStr for WindowEventInfo {
 #[derive(Debug)]
 pub struct BarConfigEventInfo {
     /// The new i3 bar configuration.
-    pub bar_config: reply::BarConfig
+    pub bar_config: reply::BarConfig,
 }
 
 impl FromStr for BarConfigEventInfo {
@@ -161,7 +161,7 @@ impl FromStr for BarConfigEventInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let val: json::Value = try!(json::from_str(s));
         Ok(BarConfigEventInfo {
-            bar_config: common::build_bar_config(&val)
+            bar_config: common::build_bar_config(&val),
         })
     }
 }
@@ -174,7 +174,7 @@ pub struct BindingEventInfo {
     /// Indicates what sort of binding event was triggered (right now it will always be "run" but
     /// that may be expanded in the future).
     pub change: BindingChange,
-    pub binding: Binding
+    pub binding: Binding,
 }
 
 impl FromStr for BindingEventInfo {
@@ -192,15 +192,19 @@ impl FromStr for BindingEventInfo {
             },
             binding: Binding {
                 command: bind.get("command").unwrap().as_str().unwrap().to_owned(),
-                event_state_mask: bind.get("event_state_mask").unwrap()
-                         .as_array().unwrap().iter()
-                         .map(|m| m.as_str().unwrap().to_owned())
-                         .collect(),
+                event_state_mask: bind
+                    .get("event_state_mask")
+                    .unwrap()
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|m| m.as_str().unwrap().to_owned())
+                    .collect(),
                 input_code: bind.get("input_code").unwrap().as_i64().unwrap() as i32,
                 symbol: match bind.get("symbol").unwrap().clone() {
                     json::Value::String(s) => Some(s),
                     json::Value::Null => None,
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 },
                 input_type: match bind.get("input_type").unwrap().as_str().unwrap() {
                     "keyboard" => InputType::Keyboard,
@@ -209,8 +213,8 @@ impl FromStr for BindingEventInfo {
                         warn!(target: "i3ipc", "Unknown InputType {}", other);
                         InputType::Unknown
                     }
-                }
-            }
+                },
+            },
         })
     }
 }
@@ -235,7 +239,7 @@ impl FromStr for ShutdownEventInfo {
             other => {
                 warn!(target: "i3ipc", "Unknown ShutdownChange {}", other);
                 ShutdownChange::Unknown
-            },
+            }
         };
         Ok(ShutdownEventInfo { change })
     }
@@ -323,7 +327,7 @@ pub mod inner {
         pub symbol: Option<String>,
 
         /// Will be Keyboard or Mouse depending on whether this was a keyboard or mouse binding.
-        pub input_type: InputType
+        pub input_type: InputType,
     }
 
     /// The kind of binding change.

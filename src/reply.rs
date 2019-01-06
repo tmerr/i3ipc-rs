@@ -8,14 +8,14 @@ pub struct CommandOutcome {
     /// Whether the command was successful.
     pub success: bool,
     /// A human-readable error message.
-    pub error: Option<String>
+    pub error: Option<String>,
 }
 
 /// The reply to the `command` request.
 #[derive(Debug)]
 pub struct Command {
     /// A list of `CommandOutcome` structs; one for each command that was parsed.
-    pub outcomes: Vec<CommandOutcome>
+    pub outcomes: Vec<CommandOutcome>,
 }
 
 /// A single workspace.
@@ -38,7 +38,7 @@ pub struct Workspace {
     /// x, y, width, height.
     pub rect: (i32, i32, i32, i32),
     /// The video output this workspace is on (LVDS1, VGA1, …).
-    pub output: String
+    pub output: String,
 }
 
 /// The reply to the `get_workspaces` request.
@@ -70,14 +70,14 @@ pub struct Output {
     pub current_workspace: Option<String>,
     /// The rectangle of this output (equals the rect of the output it is on), consists of
     /// x, y, width, height.
-    pub rect: (i32, i32, i32, i32)
+    pub rect: (i32, i32, i32, i32),
 }
 
 /// The reply to the `get_outputs` request.
 #[derive(Debug)]
 pub struct Outputs {
     /// A list of outputs (displays)
-    pub outputs: Vec<Output>
+    pub outputs: Vec<Output>,
 }
 
 #[derive(Eq, PartialEq, Debug)]
@@ -140,11 +140,11 @@ pub struct Node {
     pub name: Option<String>,
 
     /// Type of this container. Can be one of "root", "output", "con", "floating_con",
-    /// "workspace" or "dockarea". 
+    /// "workspace" or "dockarea".
     pub nodetype: NodeType,
 
     /// Can be either "normal", "none" or "1pixel", dependending on the container’s border
-    /// style. 
+    /// style.
     pub border: NodeBorder,
 
     /// Number of pixels of the border width.
@@ -156,7 +156,7 @@ pub struct Node {
 
     /// The percentage which this container takes in its parent. A value of null means that the
     /// percent property does not make sense for this container, for example for the root
-    /// container. 
+    /// container.
     pub percent: Option<f64>,
 
     /// The (x, y, width, height) absolute display coordinates for this container. Display
@@ -174,16 +174,16 @@ pub struct Node {
 
     /// The (x, y, width, height) coordinates of the window decoration inside its container.
     /// These coordinates are relative to the container and do not include the actual client
-    /// window. 
+    /// window.
     pub deco_rect: (i32, i32, i32, i32),
 
     /// The original geometry the window specified when i3 mapped it. Used when switching a
-    /// window to floating mode, for example. 
+    /// window to floating mode, for example.
     pub geometry: (i32, i32, i32, i32),
 
     /// The X11 window ID of the actual client window inside this container. This field is set
     /// to null for split containers or otherwise empty containers. This ID corresponds to what
-    /// xwininfo(1) and other X11-related tools display (usually in hex). 
+    /// xwininfo(1) and other X11-related tools display (usually in hex).
     pub window: Option<i32>,
 
     /// Whether this container (window, split container, floating container or workspace) has the
@@ -202,7 +202,7 @@ pub struct Node {
 /// no window has a mark the response will be an empty vector.
 #[derive(Debug)]
 pub struct Marks {
-    pub marks: Vec<String>
+    pub marks: Vec<String>,
 }
 
 /// The reply to the `get_bar_ids` request.
@@ -212,7 +212,7 @@ pub struct Marks {
 #[derive(Debug)]
 pub struct BarIds {
     /// A vector of configured bar IDs.
-    pub ids: Vec<String>
+    pub ids: Vec<String>,
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
@@ -254,17 +254,17 @@ pub enum ColorableBarPart {
 
     /// Text color for a workspace button when the workspace is active (visible) on some
     /// output, but the focus is on another one. You can only tell this apart from the
-    /// focused workspace when you are using multiple monitors. 
+    /// focused workspace when you are using multiple monitors.
     ActiveWorkspaceText,
 
     /// Background color for a workspace button when the workspace is active (visible) on some
     /// output, but the focus is on another one. You can only tell this apart from the
-    /// focused workspace when you are using multiple monitors. 
+    /// focused workspace when you are using multiple monitors.
     ActiveWorkspaceBg,
 
     /// Border color for a workspace button when the workspace is active (visible) on some
     /// output, but the focus is on another one. You can only tell this apart from the
-    /// focused workspace when you are using multiple monitors. 
+    /// focused workspace when you are using multiple monitors.
     ActiveWorkspaceBorder,
 
     /// Text color for a workspace button when the workspace does not have focus and is not
@@ -313,14 +313,14 @@ pub struct BarConfig {
     pub id: String,
 
     /// Either dock (the bar sets the dock window type) or hide (the bar does not show unless a
-    /// specific key is pressed). 
+    /// specific key is pressed).
     pub mode: String,
 
     /// Either bottom or top at the moment.
     pub position: String,
 
     /// Command which will be run to generate a statusline. Each line on stdout of this command
-    /// will be displayed in the bar. At the moment, no formatting is supported. 
+    /// will be displayed in the bar. At the moment, no formatting is supported.
     pub status_command: String,
 
     /// The font to use for text on the bar.
@@ -343,26 +343,26 @@ pub struct BarConfig {
 /// The reply to the `get_version` request.
 #[derive(Debug)]
 pub struct Version {
-    /// The major version of i3, such as 4. 
+    /// The major version of i3, such as 4.
     pub major: i32,
-    
+
     /// The minor version of i3, such as 2. Changes in the IPC interface (new features) will
     /// only occur with new minor (or major) releases. However, bugfixes might be introduced in
-    /// patch releases, too. 
+    /// patch releases, too.
     pub minor: i32,
-    
+
     /// The patch version of i3, such as 1 (when the complete version is 4.2.1). For versions
-    /// such as 4.2, patch will be set to 0. 
+    /// such as 4.2, patch will be set to 0.
     pub patch: i32,
 
     /// A human-readable version of i3 containing the precise git version, build date and
     /// branch name. When you need to display the i3 version to your users, use the
     /// human-readable version whenever possible (since this is what i3 --version displays,
-    /// too). 
+    /// too).
     pub human_readable: String,
 
     /// The current config path.
-    pub loaded_config_file_name: String
+    pub loaded_config_file_name: String,
 }
 
 /// The reply to the `get_binding_modes` request.
