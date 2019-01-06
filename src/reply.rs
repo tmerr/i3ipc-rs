@@ -80,7 +80,7 @@ pub struct Outputs {
     pub outputs: Vec<Output>,
 }
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub enum NodeType {
     Root,
     Output,
@@ -92,7 +92,7 @@ pub enum NodeType {
     Unknown,
 }
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub enum NodeBorder {
     Normal,
     None,
@@ -101,7 +101,7 @@ pub enum NodeBorder {
     Unknown,
 }
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub enum NodeLayout {
     SplitH,
     SplitV,
@@ -114,7 +114,7 @@ pub enum NodeLayout {
 }
 
 /// The reply to the `get_tree` request.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Node {
     /// List of child node IDs (see `nodes`, `floating_nodes` and `id`) in focus order. Traversing
     /// the tree by following the first entry in this array will result in eventually reaching the
