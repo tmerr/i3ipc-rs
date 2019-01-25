@@ -1,0 +1,20 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: rust:1.32.0-stretch
+
+    steps:
+      - checkout
+      - run:
+          name: check formatting
+          command: |
+            rustup component add rustfmt
+            cargo fmt -- --check
+      - run:
+          name: tests
+          command: cargo test
+      - run:
+          name: build
+          command: cargo build
