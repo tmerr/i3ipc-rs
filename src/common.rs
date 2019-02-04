@@ -87,7 +87,9 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             _ => unreachable!()
         },
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
-        focused: val.get("focused").unwrap().as_bool().unwrap()
+        focused: val.get("focused").unwrap().as_bool().unwrap(),
+        
+        window_properties: build_window_properties(val.get("window_properties").unwrap()),
     }
 }
 
@@ -153,4 +155,15 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
             map
         }
     }
+}
+
+fn build_window_properties(j: &json::Value) -> HashMap<String, String>{
+	let mut map = HashMap::new();
+	for (key, value) in j.as_object().unwrap() {
+		match value.as_str() {
+			Some(s) => {map.insert(key.to_owned(), s.to_owned());},
+			None => {}
+		}
+	}
+	return map;
 }
