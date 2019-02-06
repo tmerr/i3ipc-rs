@@ -10,7 +10,7 @@ A Rust library for controlling i3-wm through its [IPC interface](https://i3wm.or
 Add this to your Cargo.toml
 ```toml
 [dependencies.i3ipc]
-version = "0.9.0"
+version = "0.10.0"
 ```
 
 ## Messages:
@@ -64,7 +64,7 @@ By default i3ipc-rs targets minimum i3 version 4.11. To unlock additional featur
 
 ```
 [dependencies.i3ipc]
-version = "0.9.0"
+version = "0.10.0"
 features = ["i3-4-14"]
 ```
 
