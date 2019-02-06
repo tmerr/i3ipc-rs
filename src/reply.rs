@@ -80,7 +80,7 @@ pub struct Outputs {
     pub outputs: Vec<Output>,
 }
 
-#[derive(Eq, PartialEq, Debug, Hash)]
+#[derive(Eq, PartialEq, Debug, Hash, Clone)]
 pub enum WindowProperty {
     Title,
     Instance,
