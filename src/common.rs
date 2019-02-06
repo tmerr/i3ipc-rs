@@ -89,8 +89,36 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             json::Value::Null => None,
             _ => unreachable!(),
         },
+        window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
         focused: val.get("focused").unwrap().as_bool().unwrap(),
+    }
+}
+
+pub fn build_window_properties(j: Option<&json::Value>) -> Option<HashMap<reply::WindowProperty, String>> {
+    match j {
+        None => None,
+        Some(props) => {
+            let properties = props.as_object().unwrap();
+            let mut map = HashMap::new();
+            for (key, val) in properties {
+                let window_property = match key.as_ref() {
+                    "class" => Some(reply::WindowProperty::Class),
+                    "instance" => Some(reply::WindowProperty::Instance),
+                    "window_role" => Some(reply::WindowProperty::WindowRole),
+                    "title" => Some(reply::WindowProperty::Title),
+                    "transient_for" => Some(reply::WindowProperty::TransientFor),
+                    other => {
+                        warn!(target: "i3ipc", "Unknown WindowProperty {}", other);
+                        return None;
+                    }
+                };
+                if let Some(window_property) = window_property {
+                    map.insert(window_property, val.as_str().unwrap_or_default().to_string());
+                }
+            }
+            Some(map)
+        }
     }
 }
 
