@@ -1,42 +1,45 @@
 //! Some common code used by both the event and reply modules.
-use std::collections::HashMap;
-use serde_json as json;
 use reply;
+use serde_json as json;
+use std::collections::HashMap;
 
 /// Recursively build the tree of containers from the given json value.
 pub fn build_tree(val: &json::Value) -> reply::Node {
     reply::Node {
         focus: match val.get("focus") {
-            Some(xs) => xs.as_array()
-                          .unwrap()
-                          .iter()
-                          .map(|x| x.as_i64().unwrap())
-                          .collect(),
-            None => vec![]
+            Some(xs) => xs
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_i64().unwrap())
+                .collect(),
+            None => vec![],
         },
         nodes: match val.get("nodes") {
-            Some(nds) => nds.as_array()
-                            .unwrap()
-                            .iter()
-                            .map(|n| build_tree(n))
-                            .collect(),
-            None => vec![]
+            Some(nds) => nds
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|n| build_tree(n))
+                .collect(),
+            None => vec![],
         },
         floating_nodes: match val.get("floating_nodes") {
-            Some(nds) => nds.as_array()
-                            .unwrap()
-                            .iter()
-                            .map(|n| build_tree(n))
-                            .collect(),
-            None => vec![]
+            Some(nds) => nds
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|n| build_tree(n))
+                .collect(),
+            None => vec![],
         },
         id: val.get("id").unwrap().as_i64().unwrap(),
         name: match val.get("name") {
             Some(n) => match n.as_str() {
                 Some(s) => Some(s.to_owned()),
-                None => None
+                None => None,
             },
-            None => None
+            None => None,
         },
         nodetype: match val.get("type").unwrap().as_str().unwrap() {
             "root" => reply::NodeType::Root,
@@ -75,7 +78,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         percent: match *val.get("percent").unwrap() {
             json::Value::Number(ref f) => Some(f.as_f64().unwrap()),
             json::Value::Null => None,
-            _ => unreachable!()
+            _ => unreachable!(),
         },
         rect: build_rect(val.get("rect").unwrap()),
         window_rect: build_rect(val.get("window_rect").unwrap()),
@@ -84,11 +87,11 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         window: match val.get("window").unwrap().clone() {
             json::Value::Number(i) => Some(i.as_i64().unwrap() as i32),
             json::Value::Null => None,
-            _ => unreachable!()
+            _ => unreachable!(),
         },
         window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
-        focused: val.get("focused").unwrap().as_bool().unwrap()
+        focused: val.get("focused").unwrap().as_bool().unwrap(),
     }
 }
 
@@ -132,7 +135,12 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
         id: j.get("id").unwrap().as_str().unwrap().to_owned(),
         mode: j.get("mode").unwrap().as_str().unwrap().to_owned(),
         position: j.get("position").unwrap().as_str().unwrap().to_owned(),
-        status_command: j.get("status_command").unwrap().as_str().unwrap().to_owned(),
+        status_command: j
+            .get("status_command")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_owned(),
         font: j.get("font").unwrap().as_str().unwrap().to_owned(),
         workspace_buttons: j.get("workspace_buttons").unwrap().as_bool().unwrap(),
         binding_mode_indicator: j.get("binding_mode_indicator").unwrap().as_bool().unwrap(),
@@ -179,6 +187,6 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
                 map.insert(enum_key, hex);
             }
             map
-        }
+        },
     }
 }

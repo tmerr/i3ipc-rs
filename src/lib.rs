@@ -23,18 +23,18 @@ extern crate log;
 extern crate serde;
 extern crate serde_json;
 
-use std::{env, io, fmt, process};
-use std::io::prelude::*;
 use std::error::Error;
-use std::str::FromStr;
+use std::io::prelude::*;
 use std::os::unix::net::UnixStream;
+use std::str::FromStr;
+use std::{env, fmt, io, process};
 
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use serde_json as json;
-use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 
 mod common;
-pub mod reply;
 pub mod event;
+pub mod reply;
 
 /// An error initializing a connection.
 ///
@@ -45,19 +45,21 @@ pub enum EstablishError {
     /// An error while getting the socket path
     GetSocketPathError(io::Error),
     /// An error while accessing the socket
-    SocketError(io::Error)
+    SocketError(io::Error),
 }
 
 impl Error for EstablishError {
     fn description(&self) -> &str {
         match *self {
             EstablishError::GetSocketPathError(_) => "Couldn't determine i3's socket path",
-            EstablishError::SocketError(_) => "Found i3's socket path but failed to connect"
+            EstablishError::SocketError(_) => "Found i3's socket path but failed to connect",
         }
     }
     fn cause(&self) -> Option<&Error> {
         match *self {
-            EstablishError::GetSocketPathError(ref e) | EstablishError::SocketError(ref e) => Some(e)
+            EstablishError::GetSocketPathError(ref e) | EstablishError::SocketError(ref e) => {
+                Some(e)
+            }
         }
     }
 }
@@ -84,7 +86,9 @@ impl Error for MessageError {
         match *self {
             MessageError::Send(_) => "Network error while sending message to i3",
             MessageError::Receive(_) => "Network error while receiving message from i3",
-            MessageError::JsonCouldntParse(_) => "Got a response from i3 but couldn't parse the JSON",
+            MessageError::JsonCouldntParse(_) => {
+                "Got a response from i3 but couldn't parse the JSON"
+            }
         }
     }
     fn cause(&self) -> Option<&Error> {
@@ -110,13 +114,11 @@ fn get_socket_path() -> io::Result<String> {
         return Ok(sockpath);
     }
 
-    let output = try!(process::Command::new("i3")
-                                       .arg("--get-socketpath")
-                                       .output());
+    let output = try!(process::Command::new("i3").arg("--get-socketpath").output());
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout)
-                  .trim_right_matches('\n')
-                  .to_owned())
+            .trim_right_matches('\n')
+            .to_owned())
     } else {
         let prefix = "i3 --get-socketpath didn't return 0";
         let error_text = if !output.stderr.is_empty() {
@@ -132,17 +134,20 @@ fn get_socket_path() -> io::Result<String> {
 trait I3Funcs {
     fn send_i3_message(&mut self, u32, &str) -> io::Result<()>;
     fn receive_i3_message(&mut self) -> io::Result<(u32, String)>;
-    fn send_receive_i3_message<T: serde::de::DeserializeOwned>(&mut self, message_type: u32, payload: &str)
-        -> Result<T, MessageError>;
+    fn send_receive_i3_message<T: serde::de::DeserializeOwned>(
+        &mut self,
+        message_type: u32,
+        payload: &str,
+    ) -> Result<T, MessageError>;
 }
 
 impl I3Funcs for UnixStream {
     fn send_i3_message(&mut self, message_type: u32, payload: &str) -> io::Result<()> {
         let mut bytes = Vec::with_capacity(14 + payload.len());
-        bytes.extend("i3-ipc".bytes());                              // 6 bytes
+        bytes.extend("i3-ipc".bytes()); // 6 bytes
         try!(bytes.write_u32::<LittleEndian>(payload.len() as u32)); // 4 bytes
-        try!(bytes.write_u32::<LittleEndian>(message_type));         // 4 bytes
-        bytes.extend(payload.bytes());                               // payload.len() bytes
+        try!(bytes.write_u32::<LittleEndian>(message_type)); // 4 bytes
+        bytes.extend(payload.bytes()); // payload.len() bytes
         self.write_all(&bytes[..])
     }
 
@@ -152,20 +157,25 @@ impl I3Funcs for UnixStream {
         try!(self.read_exact(&mut magic_data));
         let magic_string = String::from_utf8_lossy(&magic_data);
         if magic_string != "i3-ipc" {
-            let error_text = format!("unexpected magic string: expected 'i3-ipc' but got {}",
-                                      magic_string);
+            let error_text = format!(
+                "unexpected magic string: expected 'i3-ipc' but got {}",
+                magic_string
+            );
             return Err(io::Error::new(io::ErrorKind::Other, error_text));
         }
         let payload_len = try!(self.read_u32::<LittleEndian>());
         let message_type = try!(self.read_u32::<LittleEndian>());
-        let mut payload_data = vec![0_u8 ; payload_len as usize];
+        let mut payload_data = vec![0_u8; payload_len as usize];
         try!(self.read_exact(&mut payload_data[..]));
         let payload_string = String::from_utf8_lossy(&payload_data).into_owned();
         Ok((message_type, payload_string))
     }
 
-    fn send_receive_i3_message<T: serde::de::DeserializeOwned>(&mut self, message_type: u32, payload: &str)
-            -> Result<T, MessageError> {
+    fn send_receive_i3_message<T: serde::de::DeserializeOwned>(
+        &mut self,
+        message_type: u32,
+        payload: &str,
+    ) -> Result<T, MessageError> {
         if let Err(e) = self.send_i3_message(message_type, payload) {
             return Err(MessageError::Send(e));
         }
@@ -173,7 +183,7 @@ impl I3Funcs for UnixStream {
             Ok((received_type, payload)) => {
                 assert_eq!(message_type, received_type);
                 payload
-            },
+            }
             Err(e) => {
                 return Err(MessageError::Receive(e));
             }
@@ -197,22 +207,26 @@ pub struct EventIterator<'a> {
 impl<'a> Iterator for EventIterator<'a> {
     type Item = Result<event::Event, MessageError>;
 
-    fn next(&mut self) -> Option<Self::Item>{
+    fn next(&mut self) -> Option<Self::Item> {
         /// the msgtype passed in should have its highest order bit stripped
         /// makes the i3 event
         fn build_event(msgtype: u32, payload: &str) -> Result<event::Event, json::Error> {
             Ok(match msgtype {
-                0 => event::Event::WorkspaceEvent(try!(event::WorkspaceEventInfo::from_str(payload))),
+                0 => {
+                    event::Event::WorkspaceEvent(try!(event::WorkspaceEventInfo::from_str(payload)))
+                }
                 1 => event::Event::OutputEvent(try!(event::OutputEventInfo::from_str(payload))),
                 2 => event::Event::ModeEvent(try!(event::ModeEventInfo::from_str(payload))),
                 3 => event::Event::WindowEvent(try!(event::WindowEventInfo::from_str(payload))),
-                4 => event::Event::BarConfigEvent(try!(event::BarConfigEventInfo::from_str(payload))),
+                4 => {
+                    event::Event::BarConfigEvent(try!(event::BarConfigEventInfo::from_str(payload)))
+                }
                 5 => event::Event::BindingEvent(try!(event::BindingEventInfo::from_str(payload))),
 
                 #[cfg(feature = "i3-4-14")]
                 6 => event::Event::ShutdownEvent(try!(event::ShutdownEventInfo::from_str(payload))),
 
-                _ => unreachable!("received an event we aren't subscribed to!")
+                _ => unreachable!("received an event we aren't subscribed to!"),
             })
         }
 
@@ -248,72 +262,73 @@ pub enum Subscription {
 /// Abstraction over an ipc socket to i3. Handles events.
 #[derive(Debug)]
 pub struct I3EventListener {
-    stream: UnixStream
+    stream: UnixStream,
 }
 
 impl I3EventListener {
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3EventListener, EstablishError> {
         match get_socket_path() {
-            Ok(path) => {
-                match UnixStream::connect(path) {
-                    Ok(stream) => Ok(I3EventListener { stream }),
-                    Err(error) => Err(EstablishError::SocketError(error))
-                }
-            }
-            Err(error) => Err(EstablishError::GetSocketPathError(error))
+            Ok(path) => match UnixStream::connect(path) {
+                Ok(stream) => Ok(I3EventListener { stream }),
+                Err(error) => Err(EstablishError::SocketError(error)),
+            },
+            Err(error) => Err(EstablishError::GetSocketPathError(error)),
         }
     }
 
     /// Subscribes your connection to certain events.
     pub fn subscribe(&mut self, events: &[Subscription]) -> Result<reply::Subscribe, MessageError> {
-        let json =
-            "[ ".to_owned()
-            + &events.iter()
-                    .map(|s| match *s {
-                        Subscription::Workspace => "\"workspace\"",
-                        Subscription::Output => "\"output\"",
-                        Subscription::Mode => "\"mode\"",
-                        Subscription::Window => "\"window\"",
-                        Subscription::BarConfig => "\"barconfig_update\"",
-                        Subscription::Binding => "\"binding\"",
-                        #[cfg(feature = "i3-4-14")]
-                        Subscription::Shutdown => "\"shutdown\""})
-                    .collect::<Vec<_>>()
-                    .join(", ")[..]
+        let json = "[ ".to_owned()
+            + &events
+                .iter()
+                .map(|s| match *s {
+                    Subscription::Workspace => "\"workspace\"",
+                    Subscription::Output => "\"output\"",
+                    Subscription::Mode => "\"mode\"",
+                    Subscription::Window => "\"window\"",
+                    Subscription::BarConfig => "\"barconfig_update\"",
+                    Subscription::Binding => "\"binding\"",
+                    #[cfg(feature = "i3-4-14")]
+                    Subscription::Shutdown => "\"shutdown\"",
+                })
+                .collect::<Vec<_>>()
+                .join(", ")[..]
             + " ]";
         let j: json::Value = try!(self.stream.send_receive_i3_message(2, &json));
         let is_success = j.get("success").unwrap().as_bool().unwrap();
-        Ok(reply::Subscribe { success: is_success })
+        Ok(reply::Subscribe {
+            success: is_success,
+        })
     }
 
     /// Iterate over subscribed events forever.
     pub fn listen(&mut self) -> EventIterator {
-        EventIterator { stream: &mut self.stream }
+        EventIterator {
+            stream: &mut self.stream,
+        }
     }
 }
 
 /// Abstraction over an ipc socket to i3. Handles messages/replies.
 #[derive(Debug)]
 pub struct I3Connection {
-    stream: UnixStream
+    stream: UnixStream,
 }
 
 impl I3Connection {
     /// Establishes the IPC connection.
     pub fn connect() -> Result<I3Connection, EstablishError> {
         match get_socket_path() {
-            Ok(path) => {
-                match UnixStream::connect(path) {
-                    Ok(stream) => Ok(I3Connection { stream }),
-                    Err(error) => Err(EstablishError::SocketError(error))
-                }
-            }
-            Err(error) => Err(EstablishError::GetSocketPathError(error))
+            Ok(path) => match UnixStream::connect(path) {
+                Ok(stream) => Ok(I3Connection { stream }),
+                Err(error) => Err(EstablishError::SocketError(error)),
+            },
+            Err(error) => Err(EstablishError::GetSocketPathError(error)),
         }
     }
 
-    #[deprecated(since = "0.8.0", note="Renamed to run_command")]
+    #[deprecated(since = "0.8.0", note = "Renamed to run_command")]
     pub fn command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
         self.run_command(string)
     }
@@ -323,17 +338,16 @@ impl I3Connection {
     pub fn run_command(&mut self, string: &str) -> Result<reply::Command, MessageError> {
         let j: json::Value = try!(self.stream.send_receive_i3_message(0, string));
         let commands = j.as_array().unwrap();
-        let vec: Vec<_>
-            = commands.iter()
-                      .map(|c|
-                           reply::CommandOutcome {
-                               success: c.get("success").unwrap().as_bool().unwrap(),
-                               error: match c.get("error") {
-                                   Some(val) => Some(val.as_str().unwrap().to_owned()),
-                                   None => None
-                               }
-                           })
-                      .collect();
+        let vec: Vec<_> = commands
+            .iter()
+            .map(|c| reply::CommandOutcome {
+                success: c.get("success").unwrap().as_bool().unwrap(),
+                error: match c.get("error") {
+                    Some(val) => Some(val.as_str().unwrap().to_owned()),
+                    None => None,
+                },
+            })
+            .collect();
 
         Ok(reply::Command { outcomes: vec })
     }
@@ -342,19 +356,18 @@ impl I3Connection {
     pub fn get_workspaces(&mut self) -> Result<reply::Workspaces, MessageError> {
         let j: json::Value = try!(self.stream.send_receive_i3_message(1, ""));
         let jworkspaces = j.as_array().unwrap();
-        let workspaces: Vec<_>
-            = jworkspaces.iter()
-                         .map(|w|
-                              reply::Workspace {
-                                  num: w.get("num").unwrap().as_i64().unwrap() as i32,
-                                  name: w.get("name").unwrap().as_str().unwrap().to_owned(),
-                                  visible: w.get("visible").unwrap().as_bool().unwrap(),
-                                  focused: w.get("focused").unwrap().as_bool().unwrap(),
-                                  urgent: w.get("urgent").unwrap().as_bool().unwrap(),
-                                  rect: common::build_rect(w.get("rect").unwrap()),
-                                  output: w.get("output").unwrap().as_str().unwrap().to_owned()
-                              })
-                         .collect();
+        let workspaces: Vec<_> = jworkspaces
+            .iter()
+            .map(|w| reply::Workspace {
+                num: w.get("num").unwrap().as_i64().unwrap() as i32,
+                name: w.get("name").unwrap().as_str().unwrap().to_owned(),
+                visible: w.get("visible").unwrap().as_bool().unwrap(),
+                focused: w.get("focused").unwrap().as_bool().unwrap(),
+                urgent: w.get("urgent").unwrap().as_bool().unwrap(),
+                rect: common::build_rect(w.get("rect").unwrap()),
+                output: w.get("output").unwrap().as_str().unwrap().to_owned(),
+            })
+            .collect();
         Ok(reply::Workspaces { workspaces })
     }
 
@@ -362,21 +375,20 @@ impl I3Connection {
     pub fn get_outputs(&mut self) -> Result<reply::Outputs, MessageError> {
         let j: json::Value = try!(self.stream.send_receive_i3_message(3, ""));
         let joutputs = j.as_array().unwrap();
-        let outputs: Vec<_>
-            = joutputs.iter()
-                      .map(|o|
-                           reply::Output {
-                               name: o.get("name").unwrap().as_str().unwrap().to_owned(),
-                               active: o.get("active").unwrap().as_bool().unwrap(),
-                               primary: o.get("primary").unwrap().as_bool().unwrap(),
-                               current_workspace: match o.get("current_workspace").unwrap().clone() {
-                                   json::Value::String(c_w) => Some(c_w),
-                                   json::Value::Null => None,
-                                   _ => unreachable!()
-                               },
-                               rect: common::build_rect(o.get("rect").unwrap())
-                           })
-                      .collect();
+        let outputs: Vec<_> = joutputs
+            .iter()
+            .map(|o| reply::Output {
+                name: o.get("name").unwrap().as_str().unwrap().to_owned(),
+                active: o.get("active").unwrap().as_bool().unwrap(),
+                primary: o.get("primary").unwrap().as_bool().unwrap(),
+                current_workspace: match o.get("current_workspace").unwrap().clone() {
+                    json::Value::String(c_w) => Some(c_w),
+                    json::Value::Null => None,
+                    _ => unreachable!(),
+                },
+                rect: common::build_rect(o.get("rect").unwrap()),
+            })
+            .collect();
         Ok(reply::Outputs { outputs })
     }
 
@@ -412,9 +424,18 @@ impl I3Connection {
             major: j.get("major").unwrap().as_i64().unwrap() as i32,
             minor: j.get("minor").unwrap().as_i64().unwrap() as i32,
             patch: j.get("patch").unwrap().as_i64().unwrap() as i32,
-            human_readable: j.get("human_readable").unwrap().as_str().unwrap().to_owned(),
-            loaded_config_file_name: j.get("loaded_config_file_name").unwrap().as_str()
-                                                                      .unwrap().to_owned()
+            human_readable: j
+                .get("human_readable")
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_owned(),
+            loaded_config_file_name: j
+                .get("loaded_config_file_name")
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_owned(),
         })
     }
 
@@ -432,18 +453,19 @@ impl I3Connection {
     pub fn get_config(&mut self) -> Result<reply::Config, MessageError> {
         let j: json::Value = try!(self.stream.send_receive_i3_message(9, ""));
         let cfg = j.get("config").unwrap().as_str().unwrap();
-        Ok(reply::Config { config: cfg.to_owned() })
+        Ok(reply::Config {
+            config: cfg.to_owned(),
+        })
     }
 }
 
-
 #[cfg(test)]
 mod test {
+    use event;
+    use std::str::FromStr;
     use I3Connection;
     use I3EventListener;
-    use event;
     use Subscription;
-    use std::str::FromStr;
 
     // for the following tests send a request and get the reponse.
     // response types are specific so often getting them at all indicates success.
@@ -472,7 +494,9 @@ mod test {
     #[test]
     fn run_command_multiple_success() {
         let mut connection = I3Connection::connect().unwrap();
-        let result = connection.run_command("exec /bin/true; exec /bin/true").unwrap();
+        let result = connection
+            .run_command("exec /bin/true; exec /bin/true")
+            .unwrap();
         assert_eq!(result.outcomes.len(), 2);
         assert!(result.outcomes[0].success);
         assert!(result.outcomes[1].success);
@@ -526,7 +550,10 @@ mod test {
     #[cfg(feature = "i3-4-13")]
     #[test]
     fn get_binding_modes() {
-        I3Connection::connect().unwrap().get_binding_modes().unwrap();
+        I3Connection::connect()
+            .unwrap()
+            .get_binding_modes()
+            .unwrap();
     }
 
     #[cfg(feature = "i3-4-14")]
@@ -537,7 +564,10 @@ mod test {
 
     #[test]
     fn event_subscribe() {
-        let s = I3EventListener::connect().unwrap().subscribe(&[Subscription::Workspace]).unwrap();
+        let s = I3EventListener::connect()
+            .unwrap()
+            .subscribe(&[Subscription::Workspace])
+            .unwrap();
         assert_eq!(s.success, true);
     }
 

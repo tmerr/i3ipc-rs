@@ -1,8 +1,8 @@
 extern crate i3ipc;
 
+use i3ipc::I3Connection;
 use std::io;
 use std::io::Write;
-use i3ipc::I3Connection;
 
 fn main() {
     println!("Executes i3 commands in a loop. Enter \"q\" at any time to quit.");
@@ -19,9 +19,10 @@ fn main() {
             break;
         }
 
-        let outcomes = connection.run_command(&command_text)
-                                 .expect("failed to send command")
-                                 .outcomes;
+        let outcomes = connection
+            .run_command(&command_text)
+            .expect("failed to send command")
+            .outcomes;
         for outcome in outcomes {
             if outcome.success {
                 println!("success");
