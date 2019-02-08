@@ -95,7 +95,9 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
     }
 }
 
-pub fn build_window_properties(j: Option<&json::Value>) -> Option<HashMap<reply::WindowProperty, String>> {
+pub fn build_window_properties(
+    j: Option<&json::Value>,
+) -> Option<HashMap<reply::WindowProperty, String>> {
     match j {
         None => None,
         Some(props) => {
@@ -114,7 +116,10 @@ pub fn build_window_properties(j: Option<&json::Value>) -> Option<HashMap<reply:
                     }
                 };
                 if let Some(window_property) = window_property {
-                    map.insert(window_property, val.as_str().unwrap_or_default().to_string());
+                    map.insert(
+                        window_property,
+                        val.as_str().unwrap_or_default().to_string(),
+                    );
                 }
             }
             Some(map)
