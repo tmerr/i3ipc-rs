@@ -248,7 +248,7 @@ impl FromStr for ShutdownEventInfo {
 /// Less important types
 pub mod inner {
     /// The kind of workspace change.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum WorkspaceChange {
         Focus,
         Init,
@@ -263,7 +263,7 @@ pub mod inner {
     }
 
     /// The kind of output change.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum OutputChange {
         Unspecified,
         /// An OutputChange we don't support yet.
@@ -271,7 +271,7 @@ pub mod inner {
     }
 
     /// The kind of window change.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum WindowChange {
         /// The window has become managed by i3.
         New,
@@ -300,7 +300,7 @@ pub mod inner {
     }
 
     /// Either keyboard or mouse.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum InputType {
         Keyboard,
         Mouse,
@@ -309,7 +309,7 @@ pub mod inner {
     }
 
     /// Contains details about the binding that was run.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub struct Binding {
         /// The i3 command that is configured to run for this binding.
         pub command: String,
@@ -331,7 +331,7 @@ pub mod inner {
     }
 
     /// The kind of binding change.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum BindingChange {
         Run,
         /// A BindingChange we don't support yet.
@@ -339,7 +339,7 @@ pub mod inner {
     }
 
     /// The kind of shutdown change.
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     #[cfg(feature = "i3-4-14")]
     #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     pub enum ShutdownChange {
