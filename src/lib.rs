@@ -117,7 +117,7 @@ fn get_socket_path() -> io::Result<String> {
     let output = try!(process::Command::new("i3").arg("--get-socketpath").output());
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout)
-            .trim_right_matches('\n')
+            .trim_end_matches('\n')
             .to_owned())
     } else {
         let prefix = "i3 --get-socketpath didn't return 0";
