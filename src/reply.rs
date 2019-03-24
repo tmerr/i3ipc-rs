@@ -122,6 +122,23 @@ pub enum NodeLayout {
     Unknown,
 }
 
+#[derive(Eq, PartialEq, Debug, Clone)]
+pub enum FullscreenMode {
+    None,
+    /// The container is in fullscreen within its current output
+    Output,
+    /// The container is in fullscreen and spans all available output
+    Global
+}
+
+#[derive(Eq, PartialEq, Debug, Clone)]
+pub enum Floating {
+    UserOn,
+    UserOff,
+    AutoOn,
+    AutoOff
+}
+
 /// The reply to the `get_tree` request.
 #[derive(Debug, Clone)]
 pub struct Node {
@@ -205,6 +222,15 @@ pub struct Node {
 
     /// Whether this container is currently focused.
     pub focused: bool,
+
+    /// Whether this container is currently sticky.
+    pub sticky: bool,
+
+    /// Type of fullscreen: none, output or global.
+    pub fullscreen_mode: FullscreenMode,
+
+    /// Floating status
+    pub floating: Floating
 }
 
 /// The reply to the `get_marks` request.
