@@ -188,6 +188,9 @@ pub struct Node {
     /// "workspace" or "dockarea".
     pub nodetype: NodeType,
 
+    /// Marks (if any) that have been set on this container.
+    pub marks: Vec<String>,
+
     /// Can be either "normal", "none" or "1pixel", dependending on the container’s border
     /// style.
     pub border: NodeBorder,

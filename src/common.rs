@@ -33,6 +33,15 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                 .collect(),
             None => vec![],
         },
+        marks: match val.get("marks") {
+            Some(mks) => mks
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|i| String::from(i.as_str().unwrap()))
+                .collect(),
+            None => vec![],
+        },
         id: val.get("id").unwrap().as_i64().unwrap(),
         name: match val.get("name") {
             Some(n) => match n.as_str() {
