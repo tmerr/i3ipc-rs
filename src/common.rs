@@ -92,6 +92,7 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
         focused: val.get("focused").unwrap().as_bool().unwrap(),
+        pid: val.get("pid").map(|val| val.as_i64().unwrap() as i32),
     }
 }
 
