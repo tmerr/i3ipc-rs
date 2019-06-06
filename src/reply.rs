@@ -70,13 +70,40 @@ pub struct Mode {
 pub struct Output {
     /// The name of this output (as seen in xrandr).
     pub name: String,
+    #[cfg(feature = "sway-1-1")]
+    /// Make of the Output
+    pub make: String,
+    #[cfg(feature = "sway-1-1")]
+    /// Make of the Output
+    pub model: String,
+    #[cfg(feature = "sway-1-1")]
+    /// Make of the Output
+    pub serial: String,
     /// Whether the output is currently active (has a valid mode).
     pub active: bool,
+    #[cfg(feature = "sway-1-1")]
+    /// DPMS status of the output
+    pub dpms: bool,
     /// Whether the output is currently the primary output.
     pub primary: bool,
+    #[cfg(feature = "sway-1-1")]
+    /// Scale of the output
+    pub scale: Option<f64>,
+    #[cfg(feature = "sway-1-1")]
+    /// Subpixel hinting for the output
+    pub subpixel_hinting: Option<String>,
+    #[cfg(feature = "sway-1-1")]
+    /// Transform for the output
+    pub transform: Option<String>,
     /// The name of the current workspace that is visible on this output. None if the output is
     /// not active.
     pub current_workspace: Option<String>,
+    #[cfg(feature = "sway-1-1")]
+    /// Modes for the output
+    pub modes: Vec<Mode>,
+    #[cfg(feature = "sway-1-1")]
+    /// current mode for the output
+    pub current_mode: Option<Mode>,
     /// The rectangle of this output (equals the rect of the output it is on), consists of
     /// x, y, width, height.
     pub rect: (i32, i32, i32, i32),

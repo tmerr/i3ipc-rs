@@ -379,6 +379,22 @@ impl I3Connection {
             .iter()
             .map(|o| reply::Output {
                 name: o.get("name").unwrap().as_str().unwrap().to_owned(),
+                #[cfg(feature = "sway-1-1")]
+                make: o.get("make").unwrap().as_str().unwrap().to_owned(),
+                #[cfg(feature = "sway-1-1")]
+                model: o.get("model").unwrap().as_str().unwrap().to_owned(),
+                #[cfg(feature = "sway-1-1")]
+                serial: o.get("serial").unwrap().as_str().unwrap().to_owned(),
+                #[cfg(feature = "sway-1-1")]
+                scale: o.get("scale").map(|s| s.as_f64().unwrap().to_owned()),
+                #[cfg(feature = "sway-1-1")]
+                subpixel_hinting: o.get("subpixel_hinting").map(|s| s.as_str() .unwrap().to_owned()),
+                #[cfg(feature = "sway-1-1")]
+                transform: o.get("transform").map(|s| s.as_str().unwrap().to_owned()),
+                #[cfg(feature = "sway-1-1")]
+                modes: common::build_modes(o.get("modes").unwrap()),
+                #[cfg(feature = "sway-1-1")]
+                current_mode: o.get("current_mode").map(|s| common::build_mode(s)),
                 active: o.get("active").unwrap().as_bool().unwrap(),
                 primary: o.get("primary").unwrap().as_bool().unwrap(),
                 current_workspace: match o.get("current_workspace").unwrap().clone() {
@@ -386,6 +402,8 @@ impl I3Connection {
                     json::Value::Null => None,
                     _ => unreachable!(),
                 },
+                #[cfg(feature = "sway-1-1")]
+                dpms: o.get("dpms").unwrap().as_bool().unwrap(),
                 rect: common::build_rect(o.get("rect").unwrap()),
             })
             .collect();
