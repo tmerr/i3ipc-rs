@@ -56,6 +56,15 @@ pub struct Subscribe {
     pub success: bool,
 }
 
+#[cfg(feature = "sway-1-1")]
+#[derive(Debug)]
+/// A mode for sway
+pub struct Mode {
+    pub width: i32,
+    pub height: i32,
+    pub refresh: i32,
+}
+
 /// A single output (display)
 #[derive(Debug)]
 pub struct Output {

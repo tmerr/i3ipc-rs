@@ -195,3 +195,24 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
         },
     }
 }
+
+#[cfg(feature = "sway-1-1")]
+pub fn build_modes(j: &json::Value) -> Vec<reply::Mode> {
+    let mut res: Vec<reply::Mode>= Vec::new();
+    for mode in j.as_array().unwrap() {
+        res.push(build_mode(mode))
+    }
+    res
+}
+
+#[cfg(feature = "sway-1-1")]
+pub fn build_mode(jmode: &json::Value) -> reply::Mode {
+    let width = jmode.get("width").unwrap().as_i64().unwrap() as i32;
+    let height = jmode.get("height").unwrap().as_i64().unwrap() as i32;
+    let refresh = jmode.get("refresh").unwrap().as_i64().unwrap() as i32;
+    reply::Mode {
+        width: width,
+        height: height,
+        refresh: refresh
+    }
+}
