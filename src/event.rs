@@ -38,7 +38,7 @@ pub struct WorkspaceEventInfo {
 impl FromStr for WorkspaceEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         Ok(WorkspaceEventInfo {
             change: match val.get("change").unwrap().as_str().unwrap() {
                 "focus" => WorkspaceChange::Focus,
@@ -79,7 +79,7 @@ pub struct OutputEventInfo {
 impl FromStr for OutputEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         Ok(OutputEventInfo {
             change: match val.get("change").unwrap().as_str().unwrap() {
                 "unspecified" => OutputChange::Unspecified,
@@ -103,7 +103,7 @@ pub struct ModeEventInfo {
 impl FromStr for ModeEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         Ok(ModeEventInfo {
             change: val.get("change").unwrap().as_str().unwrap().to_owned(),
         })
@@ -124,7 +124,7 @@ pub struct WindowEventInfo {
 impl FromStr for WindowEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         Ok(WindowEventInfo {
             change: match val.get("change").unwrap().as_str().unwrap() {
                 "new" => WindowChange::New,
@@ -159,7 +159,7 @@ pub struct BarConfigEventInfo {
 impl FromStr for BarConfigEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         Ok(BarConfigEventInfo {
             bar_config: common::build_bar_config(&val),
         })
@@ -180,7 +180,7 @@ pub struct BindingEventInfo {
 impl FromStr for BindingEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         let bind = val.get("binding").unwrap();
         Ok(BindingEventInfo {
             change: match val.get("change").unwrap().as_str().unwrap() {
@@ -232,7 +232,7 @@ pub struct ShutdownEventInfo {
 impl FromStr for ShutdownEventInfo {
     type Err = json::error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let val: json::Value = try!(json::from_str(s));
+        let val: json::Value = json::from_str(s)?;
         let change = match val.get("change").unwrap().as_str().unwrap() {
             "restart" => ShutdownChange::Restart,
             "exit" => ShutdownChange::Exit,
