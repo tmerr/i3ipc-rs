@@ -92,6 +92,21 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
         focused: val.get("focused").unwrap().as_bool().unwrap(),
+        sticky: val.get("sticky").unwrap().as_bool().unwrap(),
+        fullscreen_mode: match val.get("fullscreen_mode").unwrap().as_i64().unwrap(){
+            0 => reply::FullscreenMode::None,
+            1 => reply::FullscreenMode::Output,
+            2 => reply::FullscreenMode::Global,
+            other => {
+                warn!(target: "i3ipc", "Unknown FullscreenMode {}", other);
+                reply::FullscreenMode::None
+            }},
+        floating: match val.get("floating").unwrap().as_str().unwrap(){
+            "auto_off" => reply::Floating::AutoOff,
+            "auto_on" => reply::Floating::UserOn,
+            "user_off" => reply::Floating::UserOff,
+            "user_on" => reply::Floating::UserOn,
+            _ => unreachable!()}
     }
 }
 

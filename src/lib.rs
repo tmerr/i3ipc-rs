@@ -609,7 +609,10 @@ mod test {
                 "geometry": { "x": 6, "y": 6, "width": 10, "height": 10 },
                 "window": 1,
                 "urgent": false,
-                "focused": true
+                "focused": true,
+                "sticky": true,
+                "fullscreen_mode": 1,
+                "floating": "auto_on"
             },
             "old": null
         }"##;
@@ -649,7 +652,10 @@ mod test {
                 "window": 1,
                 "window_properties": { "class": "Firefox", "instance": "Navigator", "window_role": "browser", "title": "github.com - Mozilla Firefox", "transient_for": null },
                 "urgent": false,
-                "focused": true
+                "focused": true,
+                "sticky": false,
+                "fullscreen_mode": 0,
+                "floating": "user_on"
             }
         }"##;
         event::WindowEventInfo::from_str(json_str).unwrap();
