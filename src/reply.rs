@@ -241,6 +241,9 @@ pub struct Node {
 
     /// Whether this container is currently focused.
     pub focused: bool,
+
+    /// Marks for the container
+    pub marks: Option<Vec<String>>,
 }
 
 /// The reply to the `get_marks` request.
