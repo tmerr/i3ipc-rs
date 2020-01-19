@@ -244,6 +244,7 @@ pub struct Node {
 
     /// The PID of the program running in this container. Appears on Con and FloatingCon
     /// NodeTypes in Swaywm.
+    #[cfg(feature = "sway-1-1")]
     pub pid: Option<i32>,
 }
 
