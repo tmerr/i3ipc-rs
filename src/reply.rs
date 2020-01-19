@@ -241,6 +241,11 @@ pub struct Node {
 
     /// Whether this container is currently focused.
     pub focused: bool,
+
+    /// The PID of the program running in this container. Appears on Con and FloatingCon
+    /// NodeTypes in Swaywm.
+    #[cfg(feature = "sway-1-1")]
+    pub pid: Option<i32>,
 }
 
 /// The reply to the `get_marks` request.
