@@ -184,6 +184,11 @@ pub struct Node {
     /// defined (yet).
     pub name: Option<String>,
 
+    /// The window type (_NET_WM_WINDOW_TYPE). Possible values are normal, dialog, utility,
+    /// toolbar, splash, menu, dropdown_menu, popup_menu, tooltip and notification.
+    #[cfg(feature = "i3-4-18")]
+    pub window_type: Option<String>,
+
     /// Type of this container. Can be one of "root", "output", "con", "floating_con",
     /// "workspace" or "dockarea".
     pub nodetype: NodeType,
