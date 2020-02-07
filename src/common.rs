@@ -41,6 +41,14 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
             },
             None => None,
         },
+        #[cfg(feature = "i3-4-18")]
+        window_type: match val.get("window_type") {
+            Some(wt) => match wt.as_str() {
+                Some(s) => Some(s.to_owned()),
+                None => None,
+            },
+            None => None,
+        },
         nodetype: match val.get("type").unwrap().as_str().unwrap() {
             "root" => reply::NodeType::Root,
             "output" => reply::NodeType::Output,
