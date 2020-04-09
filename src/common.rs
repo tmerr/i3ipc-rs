@@ -75,6 +75,15 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
                 reply::NodeLayout::Unknown
             }
         },
+        marks: match val.get("marks") {
+            Some(mrks) => mrks
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|m| String::from(m.as_str().unwrap()))
+                .collect(),
+            None => vec![],
+        },
         percent: match *val.get("percent").unwrap() {
             json::Value::Number(ref f) => Some(f.as_f64().unwrap()),
             json::Value::Null => None,

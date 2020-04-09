@@ -199,6 +199,9 @@ pub struct Node {
     /// might be possible in the future, should we add new layouts.
     pub layout: NodeLayout,
 
+    /// A list of the marks applied to this node.
+    pub marks: Vec<String>,
+
     /// The percentage which this container takes in its parent. A value of null means that the
     /// percent property does not make sense for this container, for example for the root
     /// container.
