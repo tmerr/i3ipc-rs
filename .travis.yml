@@ -14,9 +14,7 @@ before_script:
   pip install 'travis-cargo<0.2' --user &&
   export PATH=$HOME/.local/bin:$PATH
 script:
-- |
-  travis-cargo build -- --features i3-next &&
-  travis-cargo --only nightly doc -- --features dox
+- ./travis.sh
 env:
   global:
   # don't have special dependencies for nightly build
