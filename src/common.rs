@@ -92,6 +92,20 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
         focused: val.get("focused").unwrap().as_bool().unwrap(),
+
+        // sway-specific fields
+
+        #[cfg(feature = "sway-1-1")]
+        app_id: (|| Some(val.get("app_id")?.as_str()?.to_string()))(),
+
+        #[cfg(feature = "sway-1-1")]
+        pid: val.get("pid").map(|p| p.as_i64().unwrap()),
+
+        #[cfg(feature = "sway-1-1")]
+        representation: (|| Some(val.get("representation")?.as_str()?.to_string()))(),
+
+        #[cfg(feature = "sway-1-1")]
+        visible: val.get("visible").map(|p| p.as_bool().unwrap()),
     }
 }
 

@@ -241,6 +241,24 @@ pub struct Node {
 
     /// Whether this container is currently focused.
     pub focused: bool,
+
+    // sway-specific
+
+    /// App id for wayland applications (sway only)
+    #[cfg(feature = "sway-1-1")]
+    pub app_id: Option<String>,
+
+    /// The Pid of application (sway only)
+    #[cfg(feature = "sway-1-1")]
+    pub pid: Option<i64>,
+
+    /// The representation of a parent container (eg: T[H[a b] c]) (sway only)
+    #[cfg(feature = "sway-1-1")]
+    pub representation: Option<String>,
+
+    /// Is the window visible (sway only)
+    #[cfg(feature = "sway-1-1")]
+    pub visible: Option<bool>,
 }
 
 /// The reply to the `get_marks` request.
