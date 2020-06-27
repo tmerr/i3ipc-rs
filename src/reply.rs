@@ -241,6 +241,10 @@ pub struct Node {
 
     /// Whether this container is currently focused.
     pub focused: bool,
+
+    /// List of marks assigned to container.
+    #[cfg(feature = "i3-4-18-1")]
+    pub marks: Vec<String>,
 }
 
 /// The reply to the `get_marks` request.

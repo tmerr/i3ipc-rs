@@ -92,6 +92,16 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
         focused: val.get("focused").unwrap().as_bool().unwrap(),
+        #[cfg(feature = "i3-4-18-1")]
+        marks: match val.get("marks") {
+            Some(marks) => marks
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|m| m.as_str().unwrap().to_string())
+                .collect(),
+            None => vec![],
+        },
     }
 }
 
@@ -198,7 +208,7 @@ pub fn build_bar_config(j: &json::Value) -> reply::BarConfig {
 
 #[cfg(feature = "sway-1-1")]
 pub fn build_modes(j: &json::Value) -> Vec<reply::Mode> {
-    let mut res: Vec<reply::Mode>= Vec::new();
+    let mut res: Vec<reply::Mode> = Vec::new();
     for mode in j.as_array().unwrap() {
         res.push(build_mode(mode))
     }
@@ -213,6 +223,6 @@ pub fn build_mode(jmode: &json::Value) -> reply::Mode {
     reply::Mode {
         width: width,
         height: height,
-        refresh: refresh
+        refresh: refresh,
     }
 }
