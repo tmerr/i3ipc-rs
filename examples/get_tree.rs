@@ -1,9 +1,6 @@
 extern crate i3ipc;
 
-use i3ipc::{
-    event::{inner::WindowChange, Event},
-    I3Connection, I3EventListener, Subscription,
-};
+use i3ipc::I3Connection;
 
 fn main() {
     // Establish a connection to i3 over a unix socket.
