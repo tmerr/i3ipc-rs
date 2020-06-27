@@ -1,20 +1,88 @@
 //! A library for controlling i3-wm through its ipc interface.
 //!
-//! Using `I3Connection` you
-//! could send a command or get the hierarchy of containers. With
-//! `I3EventListener` you could listen for when the focused window changes. One of the goals is
-//! is to make this process as fool-proof as possible: usage should follow from the type
-//! signatures.
+//! Using `I3Connection` you could send a command or get the hierarchy of
+//! containers. With `I3EventListener` you could listen for when the focused
+//! window changes. One of the goals is is to make this process as fool-proof as
+//! possible: usage should follow from the type signatures.
 //!
-//! The types in the `event` and `reply` modules are near direct translations from the JSON
-//! used to talk to i3. The relevant
-//! documentation (meaning of each json object and field) is shamelessly stolen from the
-//! [site](https://i3wm.org/docs/ipc.html)
-//! and put into those modules.
+//! The types in the `event` and `reply` modules are near direct translations
+//! from the JSON used to talk to i3. The relevant documentation (meaning of
+//! each json object and field) is shamelessly stolen from the
+//! [site](https://i3wm.org/docs/ipc.html) and put into those modules.
 //!
-//! This library should cover all of i3's documented ipc features. If it's missing something
-//! please open an issue on github.
+//! This library should cover all of i3's documented ipc features. If it's
+//! missing something please open an issue on github.
 
+//! ## Usage
+//! Add this to your Cargo.toml
+//! ```toml
+//! [dependencies.i3ipc]
+//! version = "0.10.1"
+//! ```
+//!
+//! ## Messages:
+//!
+//! ```rust
+//! extern crate i3ipc;
+//! use i3ipc::I3Connection;
+//!
+//! fn main() {
+//!     // establish a connection to i3 over a unix socket
+//!     let mut connection = I3Connection::connect().unwrap();
+//!
+//!     // request and print the i3 version
+//!     println!("{}", connection.get_version().unwrap().human_readable);
+//!
+//!     // fullscreen the focused window
+//!     connection.run_command("fullscreen").unwrap();
+//! }
+//! ```
+//!
+//! ## Events:
+//!
+//! ```rust
+//! extern crate i3ipc;
+//! use i3ipc::I3EventListener;
+//! use i3ipc::Subscription;
+//! use i3ipc::event::Event;
+//!
+//! fn main() {
+//!     // establish connection.
+//!     let mut listener = I3EventListener::connect().unwrap();
+//!
+//!     // subscribe to a couple events.
+//!     let subs = [Subscription::Mode, Subscription::Binding];
+//!     listener.subscribe(&subs).unwrap();
+//!
+//!     // handle them
+//!     // for event in listener.listen() {
+//!     //     match event.unwrap() {
+//!     //         Event::ModeEvent(e) => println!("new mode: {}", e.change),
+//!     //         Event::BindingEvent(e) => println!("user input triggered command: {}", e.binding.command),
+//!     //         _ => unreachable!()
+//!     //     }
+//!     // }
+//! }
+//! ```
+//!
+//! ## Versioning
+//!
+//! By default i3ipc-rs targets minimum i3 version 4.11. To unlock additional
+//! features you can increase this by selecting one of `"i3-4-12"`, ...,
+//! `"i3-4-18-1"` in Cargo.toml.
+//!
+//! ```toml
+//! [dependencies.i3ipc]
+//! version = "0.10.1"
+//! features = ["i3-4-18-1"]
+//! ```
+//!
+//! Additions to the i3 IPC interface that are not understood by your compiled
+//! binary will generally return an `Unknown` value and log a warning to the
+//! target `"i3ipc"` using the [log crate](http://doc.rust-lang.org/log).
+//! Binaries using this library should [install a
+//! logger](https://doc.rust-lang.org/log/log/index.html#in-executables) to view
+//! details of such additions.
 #![cfg_attr(feature = "dox", feature(doc_cfg))]
 
 extern crate byteorder;
@@ -114,7 +182,9 @@ fn get_socket_path() -> io::Result<String> {
         return Ok(sockpath);
     }
 
-    let output = process::Command::new("i3").arg("--get-socketpath").output()?;
+    let output = process::Command::new("i3")
+        .arg("--get-socketpath")
+        .output()?;
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout)
             .trim_end_matches('\n')
@@ -212,15 +282,11 @@ impl<'a> Iterator for EventIterator<'a> {
         /// makes the i3 event
         fn build_event(msgtype: u32, payload: &str) -> Result<event::Event, json::Error> {
             Ok(match msgtype {
-                0 => {
-                    event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload)?)
-                }
+                0 => event::Event::WorkspaceEvent(event::WorkspaceEventInfo::from_str(payload)?),
                 1 => event::Event::OutputEvent(event::OutputEventInfo::from_str(payload)?),
                 2 => event::Event::ModeEvent(event::ModeEventInfo::from_str(payload)?),
                 3 => event::Event::WindowEvent(event::WindowEventInfo::from_str(payload)?),
-                4 => {
-                    event::Event::BarConfigEvent(event::BarConfigEventInfo::from_str(payload)?)
-                }
+                4 => event::Event::BarConfigEvent(event::BarConfigEventInfo::from_str(payload)?),
                 5 => event::Event::BindingEvent(event::BindingEventInfo::from_str(payload)?),
 
                 #[cfg(feature = "i3-4-14")]
@@ -388,7 +454,9 @@ impl I3Connection {
                 #[cfg(feature = "sway-1-1")]
                 scale: o.get("scale").map(|s| s.as_f64().unwrap().to_owned()),
                 #[cfg(feature = "sway-1-1")]
-                subpixel_hinting: o.get("subpixel_hinting").map(|s| s.as_str() .unwrap().to_owned()),
+                subpixel_hinting: o
+                    .get("subpixel_hinting")
+                    .map(|s| s.as_str().unwrap().to_owned()),
                 #[cfg(feature = "sway-1-1")]
                 transform: o.get("transform").map(|s| s.as_str().unwrap().to_owned()),
                 #[cfg(feature = "sway-1-1")]
@@ -541,6 +609,9 @@ mod test {
     #[test]
     fn get_tree() {
         I3Connection::connect().unwrap().get_tree().unwrap();
+
+        #[cfg(feature = "i3-4-18-1")]
+        let tree = I3Connection::connect().unwrap().get_tree().unwrap().marks;
     }
 
     #[test]
