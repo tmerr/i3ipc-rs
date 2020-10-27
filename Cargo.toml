@@ -9,8 +9,8 @@ repository = "https://github.com/tmerr/i3ipc-rs"
 [dependencies]
 byteorder = "1.2.7"
 log = "0.4.6"
-serde = "1.0.80"
-serde_json = "1.0.32"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
 
 [features]
 i3-4-12 = []
