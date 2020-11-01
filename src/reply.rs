@@ -430,3 +430,12 @@ pub struct Config {
     /// A string containing the config file as loaded by i3 most recently.
     pub config: String,
 }
+
+/// The reply to the `send_tick` request.
+#[cfg(feature = "i3-4-15")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-15")))]
+#[derive(Debug)]
+pub struct Tick {
+    /// A boolean that is always true.
+    pub success: bool,
+}

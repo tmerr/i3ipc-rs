@@ -226,6 +226,9 @@ impl<'a> Iterator for EventIterator<'a> {
                 #[cfg(feature = "i3-4-14")]
                 6 => event::Event::ShutdownEvent(event::ShutdownEventInfo::from_str(payload)?),
 
+                #[cfg(feature = "i3-4-15")]
+                7 => event::Event::TickEvent(event::TickEventInfo::from_str(payload)?),
+
                 _ => unreachable!("received an event we aren't subscribed to!"),
             })
         }
@@ -257,6 +260,9 @@ pub enum Subscription {
     #[cfg(feature = "i3-4-14")]
     #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     Shutdown,
+    #[cfg(feature = "i3-4-15")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-15")))]
+    Tick,
 }
 
 /// Abstraction over an ipc socket to i3. Handles events.
@@ -291,6 +297,8 @@ impl I3EventListener {
                     Subscription::Binding => "\"binding\"",
                     #[cfg(feature = "i3-4-14")]
                     Subscription::Shutdown => "\"shutdown\"",
+                    #[cfg(feature = "i3-4-15")]
+                    Subscription::Tick => "\"tick\"",
                 })
                 .collect::<Vec<_>>()
                 .join(", ")[..]
@@ -473,6 +481,16 @@ impl I3Connection {
         let cfg = j.get("config").unwrap().as_str().unwrap();
         Ok(reply::Config {
             config: cfg.to_owned(),
+        })
+    }
+
+    /// Sends a tick event with the specified payload.
+    #[cfg(feature = "i3-4-15")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-15")))]
+    pub fn send_tick(&mut self, payload: &str) -> Result<reply::Tick, MessageError> {
+        let j: json::Value = self.stream.send_receive_i3_message(10, payload)?;
+        Ok(reply::Tick {
+            success: j.get("success").unwrap().as_bool().unwrap(),
         })
     }
 }
