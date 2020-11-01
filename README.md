@@ -60,12 +60,12 @@ fn main() {
 
 ## Versioning
 
-By default i3ipc-rs targets minimum i3 version 4.11. To unlock additional features you can increase this by selecting one of `"i3-4-12"`, ..., `"i3-4-14"` in Cargo.toml.
+By default i3ipc-rs targets minimum i3 version 4.11. To unlock additional features you can increase this by selecting one of `"i3-4-12"`, ..., `"i3-4-15"` in Cargo.toml.
 
 ```
 [dependencies.i3ipc]
 version = "0.10.1"
-features = ["i3-4-14"]
+features = ["i3-4-15"]
 ```
 
 Additions to the i3 IPC interface that are not understood by your compiled binary will generally return an `Unknown` value and log a warning to the target `"i3ipc"` using the [log crate](http://doc.rust-lang.org/log). Binaries using this library should [install a logger](https://doc.rust-lang.org/log/log/index.html#in-executables) to view details of such additions.
