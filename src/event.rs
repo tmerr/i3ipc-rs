@@ -20,6 +20,10 @@ pub enum Event {
     #[cfg(feature = "i3-4-14")]
     #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-14")))]
     ShutdownEvent(ShutdownEventInfo),
+
+    #[cfg(feature = "i3-4-15")]
+    #[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-15")))]
+    TickEvent(TickEventInfo),
 }
 
 /// Data for `WorkspaceEvent`.
@@ -242,6 +246,31 @@ impl FromStr for ShutdownEventInfo {
             }
         };
         Ok(ShutdownEventInfo { change })
+    }
+}
+
+/// Data for `TickEvent`.
+#[derive(Debug)]
+#[cfg(feature = "i3-4-15")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-15")))]
+pub struct TickEventInfo {
+    /// True if this event was sent because the IPC client subscribed to the tick event, false
+    /// otherwise.
+    pub first: bool,
+    /// The payload sent with the SEND_TICK message that generated this event.
+    pub payload: String,
+}
+
+#[cfg(feature = "i3-4-15")]
+#[cfg_attr(feature = "dox", doc(cfg(feature = "i3-4-15")))]
+impl FromStr for TickEventInfo {
+    type Err = json::error::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let val: json::Value = json::from_str(s)?;
+        Ok(TickEventInfo {
+            first: val.get("first").unwrap().as_bool().unwrap(),
+            payload: val.get("payload").unwrap().as_str().unwrap().to_owned(),
+        })
     }
 }
 
