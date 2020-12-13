@@ -49,13 +49,7 @@ pub enum EstablishError {
 }
 
 impl Error for EstablishError {
-    fn description(&self) -> &str {
-        match *self {
-            EstablishError::GetSocketPathError(_) => "Couldn't determine i3's socket path",
-            EstablishError::SocketError(_) => "Found i3's socket path but failed to connect",
-        }
-    }
-    fn cause(&self) -> Option<&dyn Error> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
             EstablishError::GetSocketPathError(ref e) | EstablishError::SocketError(ref e) => {
                 Some(e)
@@ -66,7 +60,10 @@ impl Error for EstablishError {
 
 impl fmt::Display for EstablishError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{}", match *self {
+            EstablishError::GetSocketPathError(_) => "Couldn't determine i3's socket path",
+            EstablishError::SocketError(_) => "Found i3's socket path but failed to connect",
+        })
     }
 }
 
@@ -82,16 +79,7 @@ pub enum MessageError {
 }
 
 impl Error for MessageError {
-    fn description(&self) -> &str {
-        match *self {
-            MessageError::Send(_) => "Network error while sending message to i3",
-            MessageError::Receive(_) => "Network error while receiving message from i3",
-            MessageError::JsonCouldntParse(_) => {
-                "Got a response from i3 but couldn't parse the JSON"
-            }
-        }
-    }
-    fn cause(&self) -> Option<&dyn Error> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
             MessageError::Send(ref e) | MessageError::Receive(ref e) => Some(e),
             MessageError::JsonCouldntParse(ref e) => Some(e),
@@ -101,7 +89,13 @@ impl Error for MessageError {
 
 impl fmt::Display for MessageError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{}", match *self {
+            MessageError::Send(_) => "Network error while sending message to i3",
+            MessageError::Receive(_) => "Network error while receiving message from i3",
+            MessageError::JsonCouldntParse(_) => {
+                "Got a response from i3 but couldn't parse the JSON"
+            }
+        })
     }
 }
 
