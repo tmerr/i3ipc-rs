@@ -92,6 +92,15 @@ pub fn build_tree(val: &json::Value) -> reply::Node {
         window_properties: build_window_properties(val.get("window_properties")),
         urgent: val.get("urgent").unwrap().as_bool().unwrap(),
         focused: val.get("focused").unwrap().as_bool().unwrap(),
+        marks: match val.get("marks") {
+            Some(xs) => Some(xs
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_str().unwrap().to_owned())
+                .collect()),
+            None => None,
+        },
     }
 }
 
