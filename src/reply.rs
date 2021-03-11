@@ -243,6 +243,28 @@ pub struct Node {
     pub focused: bool,
 }
 
+impl Node {
+    pub fn find_child(&self, f: fn(&Node) -> bool) -> Option<&Node> {
+
+        if f(&self) {
+            return Some(self)
+        }
+        for m in self.nodes.iter() {
+            match m.find_child(f) {
+                Some(o) => return Some(o),
+                None => {}
+            }
+        }
+        for m in self.floating_nodes.iter() {
+            match m.find_child(f) {
+                Some(o) => return Some(o),
+                None => {}
+            }
+        }
+        None
+    }
+}
+
 /// The reply to the `get_marks` request.
 ///
 /// Consists of a single vector of strings for each container that has a mark. A mark can only
