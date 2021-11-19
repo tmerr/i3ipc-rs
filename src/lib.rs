@@ -66,7 +66,7 @@ impl Error for EstablishError {
 
 impl fmt::Display for EstablishError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{}", self.to_string())
     }
 }
 
@@ -101,7 +101,7 @@ impl Error for MessageError {
 
 impl fmt::Display for MessageError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{}", self.to_string())
     }
 }
 
@@ -132,7 +132,7 @@ fn get_socket_path() -> io::Result<String> {
 }
 
 trait I3Funcs {
-    fn send_i3_message(&mut self, u32, &str) -> io::Result<()>;
+    fn send_i3_message(&mut self, message_type: u32, payload: &str) -> io::Result<()>;
     fn receive_i3_message(&mut self) -> io::Result<(u32, String)>;
     fn send_receive_i3_message<T: serde::de::DeserializeOwned>(
         &mut self,
